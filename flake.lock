@@ -5,7 +5,7 @@
         "darwin": "darwin",
         "home-manager": "home-manager",
         "nixpkgs": [
-          "profiles",
+          "archetypes",
           "vm",
           "nixpkgs"
         ],
@@ -41,10 +41,59 @@
         "url": "https://forge.anarch.diy/allod/tools.git"
       }
     },
+    "archetypes": {
+      "inputs": {
+        "agenix": [
+          "archetypes",
+          "vm",
+          "agenix"
+        ],
+        "allod-tools": "allod-tools",
+        "home-manager": [
+          "archetypes",
+          "vm",
+          "home-manager"
+        ],
+        "inventory": [
+          "inventory"
+        ],
+        "nexus": "nexus",
+        "nixpkgs": [
+          "archetypes",
+          "vm",
+          "nixpkgs"
+        ],
+        "nixpkgs-unstable": [
+          "archetypes",
+          "vm",
+          "nixpkgs-unstable"
+        ],
+        "profiles": [
+          "profiles"
+        ],
+        "secrets": [
+          "secrets"
+        ],
+        "vm": "vm"
+      },
+      "locked": {
+        "lastModified": 1784323583,
+        "narHash": "sha256-cHsxHlDmmJEmiT+5XE/QglHz2VlmaUFzVsVchmMX+fk=",
+        "ref": "refs/heads/master",
+        "rev": "0ebda69f92374ecfacf97a3e48657aa0df56e8b1",
+        "revCount": 19,
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/archetypes.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/archetypes.git"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
-          "profiles",
+          "archetypes",
           "vm",
           "agenix",
           "nixpkgs"
@@ -68,7 +117,7 @@
     "disko": {
       "inputs": {
         "nixpkgs": [
-          "profiles",
+          "archetypes",
           "vm",
           "nixpkgs"
         ]
@@ -90,7 +139,7 @@
     "home-manager": {
       "inputs": {
         "nixpkgs": [
-          "profiles",
+          "archetypes",
           "vm",
           "agenix",
           "nixpkgs"
@@ -113,7 +162,7 @@
     "home-manager_2": {
       "inputs": {
         "nixpkgs": [
-          "profiles",
+          "archetypes",
           "vm",
           "nixpkgs"
         ]
@@ -135,14 +184,14 @@
     },
     "inventory": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1784211173,
-        "narHash": "sha256-Rtv0Z8yBHiOnkJce9ggK344l/t9TfHhxi8c4Xol6nts=",
+        "lastModified": 1784319610,
+        "narHash": "sha256-cNLgc76jfNEPcALSapAaRbgtE/Pswg+0z3zbRU+Td90=",
         "ref": "refs/heads/master",
-        "rev": "0ec291175226fe6775db3e3946ac761532b7bf59",
-        "revCount": 8,
+        "rev": "efdcd5bcdcca095ad88027206121e03d1349faf7",
+        "revCount": 10,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/inventory.git"
       },
@@ -175,15 +224,15 @@
     "nexus": {
       "inputs": {
         "agenix": [
-          "profiles",
+          "archetypes",
           "agenix"
         ],
         "home-manager": [
-          "profiles",
+          "archetypes",
           "home-manager"
         ],
         "nixpkgs": [
-          "profiles",
+          "archetypes",
           "nixpkgs"
         ]
       },
@@ -203,11 +252,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1782335603,
-        "narHash": "sha256-sZkQH1CkiZtdvcaLx4sGQD9Q9h+A8qB04DRpqQCN530=",
+        "lastModified": 1782847189,
+        "narHash": "sha256-twXPFqFsrrY5r28Zh7Homgcp2gUMBgQ6WDS98Q/3xFI=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "03c72920da828594fae523aaef96f33dff10b340",
+        "rev": "b6018f87da91d19d0ab4cf979885689b469cdd41",
         "type": "github"
       },
       "original": {
@@ -235,6 +284,22 @@
     },
     "nixpkgs_2": {
       "locked": {
+        "lastModified": 1782335603,
+        "narHash": "sha256-sZkQH1CkiZtdvcaLx4sGQD9Q9h+A8qB04DRpqQCN530=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "03c72920da828594fae523aaef96f33dff10b340",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-25.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_3": {
+      "locked": {
         "lastModified": 1782847189,
         "narHash": "sha256-twXPFqFsrrY5r28Zh7Homgcp2gUMBgQ6WDS98Q/3xFI=",
         "owner": "NixOS",
@@ -249,7 +314,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_3": {
+    "nixpkgs_4": {
       "locked": {
         "lastModified": 1782335603,
         "narHash": "sha256-sZkQH1CkiZtdvcaLx4sGQD9Q9h+A8qB04DRpqQCN530=",
@@ -267,53 +332,30 @@
     },
     "profiles": {
       "inputs": {
-        "agenix": [
-          "profiles",
-          "vm",
-          "agenix"
-        ],
-        "allod-tools": "allod-tools",
-        "home-manager": [
-          "profiles",
-          "vm",
-          "home-manager"
-        ],
-        "inventory": [
-          "inventory"
-        ],
-        "nexus": "nexus",
-        "nixpkgs": [
-          "profiles",
-          "vm",
-          "nixpkgs"
-        ],
-        "nixpkgs-unstable": [
-          "profiles",
-          "vm",
-          "nixpkgs-unstable"
-        ],
-        "secrets": [
-          "secrets"
-        ],
-        "vm": "vm"
+        "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1784251115,
-        "narHash": "sha256-K+At3HxiSIN8almWCcRdUQMoXqX/mBNb7ubaqHrjNqo=",
+        "lastModified": 1784322171,
+        "narHash": "sha256-b13FdhafF6N9MrjSdxB2IphqUmBvBdpHkfOf51HAQtM=",
         "ref": "refs/heads/master",
-        "rev": "2f9cde8ee81ae85b67b9703d70d6dd53de34e23e",
-        "revCount": 17,
+        "rev": "8e0b9a0a2fd9930375dcb92118a70920441f9ec5",
+        "revCount": 2,
         "type": "git",
-        "url": "https://forge.anarch.diy/allod/archetypes.git"
+        "url": "https://forge.anarch.diy/allod/profiles.git"
       },
       "original": {
         "type": "git",
-        "url": "https://forge.anarch.diy/allod/archetypes.git"
+        "url": "https://forge.anarch.diy/allod/profiles.git"
       }
     },
     "root": {
       "inputs": {
+        "archetypes": "archetypes",
         "inventory": "inventory",
+        "nixpkgs": [
+          "archetypes",
+          "nixpkgs"
+        ],
         "profiles": "profiles",
         "secrets": "secrets"
       }
@@ -321,14 +363,14 @@
     "secrets": {
       "inputs": {
         "inventory": "inventory_2",
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1784229251,
-        "narHash": "sha256-47G//aEl+oYsdSHhSdaFEi/wrKbXLkEUccnsrHVFNHI=",
+        "lastModified": 1784322568,
+        "narHash": "sha256-nCLHY/l6P5eijrFzTIGRWLyakrVGnXUZG4GjclEUBEY=",
         "ref": "refs/heads/master",
-        "rev": "600341d27f05317fab4147f83f8bd3e703dd2276",
-        "revCount": 18,
+        "rev": "8d53a532d6db9ccf965ba74443bf458151942bb9",
+        "revCount": 20,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/secrets.git"
       },
@@ -357,7 +399,7 @@
         "agenix": "agenix",
         "disko": "disko",
         "home-manager": "home-manager_2",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable"
       },
       "locked": {
