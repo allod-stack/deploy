@@ -1,0 +1,380 @@
+{
+  "nodes": {
+    "agenix": {
+      "inputs": {
+        "darwin": "darwin",
+        "home-manager": "home-manager",
+        "nixpkgs": [
+          "profiles",
+          "vm",
+          "nixpkgs"
+        ],
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1770165109,
+        "narHash": "sha256-9VnK6Oqai65puVJ4WYtCTvlJeXxMzAp/69HhQuTdl/I=",
+        "owner": "ryantm",
+        "repo": "agenix",
+        "rev": "b027ee29d959fda4b60b57566d64c98a202e0feb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ryantm",
+        "repo": "agenix",
+        "type": "github"
+      }
+    },
+    "allod-tools": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1784243624,
+        "narHash": "sha256-8S7lUj5fSQO1WqcAUuIyA+fK6n3xz90AN8eqb/4cqVY=",
+        "ref": "refs/heads/master",
+        "rev": "a177b0f1e1ac47bd334072b778922973e55f5caa",
+        "revCount": 113,
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/tools.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/tools.git"
+      }
+    },
+    "darwin": {
+      "inputs": {
+        "nixpkgs": [
+          "profiles",
+          "vm",
+          "agenix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1744478979,
+        "narHash": "sha256-dyN+teG9G82G+m+PX/aSAagkC+vUv0SgUw3XkPhQodQ=",
+        "owner": "lnl7",
+        "repo": "nix-darwin",
+        "rev": "43975d782b418ebf4969e9ccba82466728c2851b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lnl7",
+        "ref": "master",
+        "repo": "nix-darwin",
+        "type": "github"
+      }
+    },
+    "disko": {
+      "inputs": {
+        "nixpkgs": [
+          "profiles",
+          "vm",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1781152676,
+        "narHash": "sha256-RxWs5ND31KzTG7wvMM+PMfUjyNpmIEr999lqNARaM5o=",
+        "owner": "nix-community",
+        "repo": "disko",
+        "rev": "ff8702b4de27f72b4c78573dfb89ec74e36abdf1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "disko",
+        "type": "github"
+      }
+    },
+    "home-manager": {
+      "inputs": {
+        "nixpkgs": [
+          "profiles",
+          "vm",
+          "agenix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1745494811,
+        "narHash": "sha256-YZCh2o9Ua1n9uCvrvi5pRxtuVNml8X2a03qIFfRKpFs=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "abfad3d2958c9e6300a883bd443512c55dfeb1be",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "home-manager_2": {
+      "inputs": {
+        "nixpkgs": [
+          "profiles",
+          "vm",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1779506708,
+        "narHash": "sha256-QOD/CNm196nCJRheux/URi4/HE66fthdOMqCJoPP1Y0=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "3ee51fbdac8c8bdfe1e7e1fcaba6520a563f394f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "ref": "release-25.11",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "inventory": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1784211173,
+        "narHash": "sha256-Rtv0Z8yBHiOnkJce9ggK344l/t9TfHhxi8c4Xol6nts=",
+        "ref": "refs/heads/master",
+        "rev": "0ec291175226fe6775db3e3946ac761532b7bf59",
+        "revCount": 8,
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/inventory.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/inventory.git"
+      }
+    },
+    "inventory_2": {
+      "inputs": {
+        "nixpkgs": [
+          "secrets",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784211173,
+        "narHash": "sha256-Rtv0Z8yBHiOnkJce9ggK344l/t9TfHhxi8c4Xol6nts=",
+        "ref": "refs/heads/master",
+        "rev": "0ec291175226fe6775db3e3946ac761532b7bf59",
+        "revCount": 8,
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/inventory.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/inventory.git"
+      }
+    },
+    "nexus": {
+      "inputs": {
+        "agenix": [
+          "profiles",
+          "agenix"
+        ],
+        "home-manager": [
+          "profiles",
+          "home-manager"
+        ],
+        "nixpkgs": [
+          "profiles",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784229259,
+        "narHash": "sha256-iIoRRuS8rno0DXH4Zm1Zb7rR1hWutfZZveIjtdtXAxM=",
+        "ref": "refs/heads/master",
+        "rev": "0283d10322ece794ae4eff5928aa82596efc52af",
+        "revCount": 9,
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/nexus.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/nexus.git"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1782335603,
+        "narHash": "sha256-sZkQH1CkiZtdvcaLx4sGQD9Q9h+A8qB04DRpqQCN530=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "03c72920da828594fae523aaef96f33dff10b340",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-25.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-unstable": {
+      "locked": {
+        "lastModified": 1783522502,
+        "narHash": "sha256-iffAls3iaNTyJC2faYcUXSI+Gp02cDjYl+MygxKl2GI=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "0bb7ec54c8483066ec9d7720e780a5caa71f8612",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1782847189,
+        "narHash": "sha256-twXPFqFsrrY5r28Zh7Homgcp2gUMBgQ6WDS98Q/3xFI=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "b6018f87da91d19d0ab4cf979885689b469cdd41",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-25.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1782335603,
+        "narHash": "sha256-sZkQH1CkiZtdvcaLx4sGQD9Q9h+A8qB04DRpqQCN530=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "03c72920da828594fae523aaef96f33dff10b340",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-25.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "profiles": {
+      "inputs": {
+        "agenix": [
+          "profiles",
+          "vm",
+          "agenix"
+        ],
+        "allod-tools": "allod-tools",
+        "home-manager": [
+          "profiles",
+          "vm",
+          "home-manager"
+        ],
+        "inventory": [
+          "inventory"
+        ],
+        "nexus": "nexus",
+        "nixpkgs": [
+          "profiles",
+          "vm",
+          "nixpkgs"
+        ],
+        "nixpkgs-unstable": [
+          "profiles",
+          "vm",
+          "nixpkgs-unstable"
+        ],
+        "secrets": [
+          "secrets"
+        ],
+        "vm": "vm"
+      },
+      "locked": {
+        "lastModified": 1784251115,
+        "narHash": "sha256-K+At3HxiSIN8almWCcRdUQMoXqX/mBNb7ubaqHrjNqo=",
+        "ref": "refs/heads/master",
+        "rev": "2f9cde8ee81ae85b67b9703d70d6dd53de34e23e",
+        "revCount": 17,
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/profiles.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/profiles.git"
+      }
+    },
+    "root": {
+      "inputs": {
+        "inventory": "inventory",
+        "profiles": "profiles",
+        "secrets": "secrets"
+      }
+    },
+    "secrets": {
+      "inputs": {
+        "inventory": "inventory_2",
+        "nixpkgs": "nixpkgs_3"
+      },
+      "locked": {
+        "lastModified": 1784229251,
+        "narHash": "sha256-47G//aEl+oYsdSHhSdaFEi/wrKbXLkEUccnsrHVFNHI=",
+        "ref": "refs/heads/master",
+        "rev": "600341d27f05317fab4147f83f8bd3e703dd2276",
+        "revCount": 18,
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/secrets.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/secrets.git"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "vm": {
+      "inputs": {
+        "agenix": "agenix",
+        "disko": "disko",
+        "home-manager": "home-manager_2",
+        "nixpkgs": "nixpkgs_2",
+        "nixpkgs-unstable": "nixpkgs-unstable"
+      },
+      "locked": {
+        "lastModified": 1783798656,
+        "narHash": "sha256-5MJ5TWRWE54Cd495zZGJZYPK+QmEqwjlM/JVYwojDc4=",
+        "ref": "refs/heads/master",
+        "rev": "85f7237767ae6adc3c8c9423ba74e451047a618e",
+        "revCount": 2,
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/vm.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/vm.git"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
