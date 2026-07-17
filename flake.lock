@@ -304,11 +304,11 @@
         "rev": "2f9cde8ee81ae85b67b9703d70d6dd53de34e23e",
         "revCount": 17,
         "type": "git",
-        "url": "https://forge.anarch.diy/allod/profiles.git"
+        "url": "https://forge.anarch.diy/allod/archetypes.git"
       },
       "original": {
         "type": "git",
-        "url": "https://forge.anarch.diy/allod/profiles.git"
+        "url": "https://forge.anarch.diy/allod/archetypes.git"
       }
     },
     "root": {

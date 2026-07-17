@@ -9,7 +9,7 @@
   # them at its own repos and builds real machines. Nothing else differs —
   # fork-private additions (extra checks, say) layer on top of this shape.
   inputs = {
-    profiles.url = "git+https://forge.anarch.diy/allod/profiles.git";
+    profiles.url = "git+https://forge.anarch.diy/allod/archetypes.git";
 
     secrets.url   = "git+https://forge.anarch.diy/allod/secrets.git";
     inventory.url = "git+https://forge.anarch.diy/allod/inventory.git";
