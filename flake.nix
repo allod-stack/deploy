@@ -25,9 +25,11 @@
     nixpkgs.follows = "archetypes/nixpkgs";
   };
 
-  outputs = { self, nixpkgs, archetypes, profiles, ... }:
+  outputs = { self, nixpkgs, archetypes, profiles, inventory, ... }:
     let
-      systems = [ "x86_64-linux" "aarch64-linux" ];
+      # Derive the checked systems from the inventory source of truth rather than
+      # hard-coding architecture strings.
+      systems = inventory.lib.supportedPlatforms;
     in {
       nixosConfigurations = archetypes.nixosConfigurations;
 
