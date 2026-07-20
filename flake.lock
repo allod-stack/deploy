@@ -77,11 +77,11 @@
         "vm": "vm"
       },
       "locked": {
-        "lastModified": 1784398939,
-        "narHash": "sha256-U3YvgwCd+ROIl3bw9EqO0NbWmClrJnIa7Yuqz6icrgo=",
+        "lastModified": 1784564363,
+        "narHash": "sha256-Cdc0UkMRrYB//QUAqaq/T6qjjKf/pHQgC8++hoGXm7A=",
         "ref": "refs/heads/master",
-        "rev": "67cbbffb7f5363eb480dbbc7a5a6602245b423a0",
-        "revCount": 21,
+        "rev": "96cfe94768131dba7ff33370f01cabd9f004c9a4",
+        "revCount": 23,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/archetypes.git"
       },
@@ -335,11 +335,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1784322171,
-        "narHash": "sha256-b13FdhafF6N9MrjSdxB2IphqUmBvBdpHkfOf51HAQtM=",
+        "lastModified": 1784560450,
+        "narHash": "sha256-aLUmX2vHTV4wUxH423mLKE794oerHM5GMZFtsJVIuhI=",
         "ref": "refs/heads/master",
-        "rev": "8e0b9a0a2fd9930375dcb92118a70920441f9ec5",
-        "revCount": 2,
+        "rev": "e42709b794f2320af6720671aebc8c48b6427de7",
+        "revCount": 3,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/profiles.git"
       },
