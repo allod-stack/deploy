@@ -28,11 +28,11 @@
     "allod-tools": {
       "flake": false,
       "locked": {
-        "lastModified": 1784999184,
-        "narHash": "sha256-WQhj4pcgeqDmXcKF2wjju9J4ywRj/M6oF2/w4YZsRLU=",
+        "lastModified": 1785192932,
+        "narHash": "sha256-ra4gO9Eov5Fp0D3HdNOKO8iDmtEF6LK2A9jhWzD7vLw=",
         "ref": "refs/heads/master",
-        "rev": "d49b2f6c2fa0eb8d854af6df470d42ff6a302fc4",
-        "revCount": 121,
+        "rev": "7a16f26305487ba3d115d7bae14365a8e07e0bad",
+        "revCount": 122,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/tools.git"
       },
@@ -49,6 +49,11 @@
           "agenix"
         ],
         "allod-tools": "allod-tools",
+        "disko": [
+          "archetypes",
+          "vm",
+          "disko"
+        ],
         "home-manager": [
           "archetypes",
           "vm",
@@ -77,11 +82,11 @@
         "vm": "vm"
       },
       "locked": {
-        "lastModified": 1785153032,
-        "narHash": "sha256-DWYvbOwAdxWcXHxRvTWQtQ+syMDZo7sC8OPGhEymcLg=",
+        "lastModified": 1785194457,
+        "narHash": "sha256-48wOMajlsHPZx9VDCxm6SfZKh0qqNgfzBSQVYD3mTMk=",
         "ref": "refs/heads/master",
-        "rev": "702220eaaaa86d7bfb18589a81dc3883f4615836",
-        "revCount": 25,
+        "rev": "2c0cc9e1404a2b18b4d31416995046495b94c23f",
+        "revCount": 27,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/archetypes.git"
       },
@@ -366,11 +371,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1784989545,
-        "narHash": "sha256-Edr4R+hF8s75v8N16GsKHEFJbyeHfrrvmeYR+1Bg+Ds=",
+        "lastModified": 1785153053,
+        "narHash": "sha256-V4ticL+BegTLS1T7iajg11+SVKWOpBDJk3H4eCCNa3E=",
         "ref": "refs/heads/master",
-        "rev": "43b7d2bb4cfa5d300ab2311980e8d5d56f74e5ad",
-        "revCount": 23,
+        "rev": "34203007735a55ff75ccf53b219cc59237cb549d",
+        "revCount": 24,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/secrets.git"
       },
