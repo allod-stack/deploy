@@ -6,10 +6,36 @@
         "home-manager": "home-manager",
         "nixpkgs": [
           "archetypes",
+          "nexus",
           "vm",
           "nixpkgs"
         ],
         "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1770165109,
+        "narHash": "sha256-9VnK6Oqai65puVJ4WYtCTvlJeXxMzAp/69HhQuTdl/I=",
+        "owner": "ryantm",
+        "repo": "agenix",
+        "rev": "b027ee29d959fda4b60b57566d64c98a202e0feb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ryantm",
+        "repo": "agenix",
+        "type": "github"
+      }
+    },
+    "agenix_2": {
+      "inputs": {
+        "darwin": "darwin_2",
+        "home-manager": "home-manager_3",
+        "nixpkgs": [
+          "archetypes",
+          "vm",
+          "nixpkgs"
+        ],
+        "systems": "systems_2"
       },
       "locked": {
         "lastModified": 1770165109,
@@ -79,14 +105,14 @@
         "secrets": [
           "secrets"
         ],
-        "vm": "vm"
+        "vm": "vm_2"
       },
       "locked": {
-        "lastModified": 1785332007,
-        "narHash": "sha256-UFu/Y6+45dsUfkI19wiJqYBlA6ZgJX5GLi+PyLsMIa0=",
+        "lastModified": 1785797440,
+        "narHash": "sha256-G6OkKhpDJJ6M9+vkSNF6vULsu1DZ8H09XZ84hXEGaqE=",
         "ref": "refs/heads/master",
-        "rev": "42f652ae7d15a89a9426ca0744997ef58037c1e7",
-        "revCount": 32,
+        "rev": "97725370f649d329897d268a9b4384c54ffa05ce",
+        "revCount": 56,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/archetypes.git"
       },
@@ -96,6 +122,31 @@
       }
     },
     "darwin": {
+      "inputs": {
+        "nixpkgs": [
+          "archetypes",
+          "nexus",
+          "vm",
+          "agenix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1744478979,
+        "narHash": "sha256-dyN+teG9G82G+m+PX/aSAagkC+vUv0SgUw3XkPhQodQ=",
+        "owner": "lnl7",
+        "repo": "nix-darwin",
+        "rev": "43975d782b418ebf4969e9ccba82466728c2851b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lnl7",
+        "ref": "master",
+        "repo": "nix-darwin",
+        "type": "github"
+      }
+    },
+    "darwin_2": {
       "inputs": {
         "nixpkgs": [
           "archetypes",
@@ -123,6 +174,29 @@
       "inputs": {
         "nixpkgs": [
           "archetypes",
+          "nexus",
+          "vm",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1781152676,
+        "narHash": "sha256-RxWs5ND31KzTG7wvMM+PMfUjyNpmIEr999lqNARaM5o=",
+        "owner": "nix-community",
+        "repo": "disko",
+        "rev": "ff8702b4de27f72b4c78573dfb89ec74e36abdf1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "disko",
+        "type": "github"
+      }
+    },
+    "disko_2": {
+      "inputs": {
+        "nixpkgs": [
+          "archetypes",
           "vm",
           "nixpkgs"
         ]
@@ -145,6 +219,7 @@
       "inputs": {
         "nixpkgs": [
           "archetypes",
+          "nexus",
           "vm",
           "agenix",
           "nixpkgs"
@@ -165,6 +240,53 @@
       }
     },
     "home-manager_2": {
+      "inputs": {
+        "nixpkgs": [
+          "archetypes",
+          "nexus",
+          "vm",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1779506708,
+        "narHash": "sha256-QOD/CNm196nCJRheux/URi4/HE66fthdOMqCJoPP1Y0=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "3ee51fbdac8c8bdfe1e7e1fcaba6520a563f394f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "ref": "release-25.11",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "home-manager_3": {
+      "inputs": {
+        "nixpkgs": [
+          "archetypes",
+          "vm",
+          "agenix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784913159,
+        "narHash": "sha256-JWq0BfjO4ktpH5USfQNQzdvHpIDT8fSKD5K7LvdMRFs=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "079a3b5d1aa6a719920a51316253b7d6dd22738d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "home-manager_4": {
       "inputs": {
         "nixpkgs": [
           "archetypes",
@@ -192,11 +314,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1784989538,
-        "narHash": "sha256-h6OajlnszrdSRvLcUb6anmrbxvvBFbYMwqIArm6oGk0=",
+        "lastModified": 1785437135,
+        "narHash": "sha256-kLRVh1p4WgMN5ceLJOxt/3zqUGD2HF1VCbhmdSjCsHw=",
         "ref": "refs/heads/master",
-        "rev": "efe4a7c79bd65109882d99a924982240c908dc7a",
-        "revCount": 12,
+        "rev": "15ad5528edc18b0bb7443a4f593986526bef3f99",
+        "revCount": 15,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/inventory.git"
       },
@@ -213,17 +335,66 @@
         ]
       },
       "locked": {
-        "lastModified": 1784989538,
-        "narHash": "sha256-h6OajlnszrdSRvLcUb6anmrbxvvBFbYMwqIArm6oGk0=",
+        "lastModified": 1785437135,
+        "narHash": "sha256-kLRVh1p4WgMN5ceLJOxt/3zqUGD2HF1VCbhmdSjCsHw=",
         "ref": "refs/heads/master",
-        "rev": "efe4a7c79bd65109882d99a924982240c908dc7a",
-        "revCount": 12,
+        "rev": "15ad5528edc18b0bb7443a4f593986526bef3f99",
+        "revCount": 15,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/inventory.git"
       },
       "original": {
         "type": "git",
         "url": "https://forge.anarch.diy/allod/inventory.git"
+      }
+    },
+    "microvm": {
+      "inputs": {
+        "nixpkgs": [
+          "archetypes",
+          "nexus",
+          "vm",
+          "nixpkgs"
+        ],
+        "spectrum": "spectrum"
+      },
+      "locked": {
+        "lastModified": 1785246989,
+        "narHash": "sha256-7CjGBACbXXIJvGrPed75QI8ytqc48M78GP9aB/h2VSc=",
+        "owner": "microvm-nix",
+        "repo": "microvm.nix",
+        "rev": "39a499ab85311b56dddb09ec43351cc3658f22c1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "microvm-nix",
+        "repo": "microvm.nix",
+        "rev": "39a499ab85311b56dddb09ec43351cc3658f22c1",
+        "type": "github"
+      }
+    },
+    "microvm_2": {
+      "inputs": {
+        "nixpkgs": [
+          "archetypes",
+          "vm",
+          "nixpkgs"
+        ],
+        "spectrum": "spectrum_2"
+      },
+      "locked": {
+        "lastModified": 1785246989,
+        "narHash": "sha256-7CjGBACbXXIJvGrPed75QI8ytqc48M78GP9aB/h2VSc=",
+        "owner": "microvm-nix",
+        "repo": "microvm.nix",
+        "rev": "39a499ab85311b56dddb09ec43351cc3658f22c1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "microvm-nix",
+        "repo": "microvm.nix",
+        "rev": "39a499ab85311b56dddb09ec43351cc3658f22c1",
+        "type": "github"
       }
     },
     "nexus": {
@@ -239,14 +410,15 @@
         "nixpkgs": [
           "archetypes",
           "nixpkgs"
-        ]
+        ],
+        "vm": "vm"
       },
       "locked": {
-        "lastModified": 1785262631,
-        "narHash": "sha256-dyjPUJQyDA9QvHdLMS37PEGCGJdVIjFJQ03qq7tkfoA=",
+        "lastModified": 1785447931,
+        "narHash": "sha256-H/SFmmZVWNh16tBR0A4pbxfTs2DkmB+V7BMsGkyfe4M=",
         "ref": "refs/heads/master",
-        "rev": "1d615fbca233798c07656d449e1bc2183d8ad36f",
-        "revCount": 14,
+        "rev": "1f96145c191399ee19023fbbbeb39bad2e47fa5d",
+        "revCount": 24,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/nexus.git"
       },
@@ -272,6 +444,22 @@
       }
     },
     "nixpkgs-unstable": {
+      "locked": {
+        "lastModified": 1785090369,
+        "narHash": "sha256-m0pDuRJG7EDo9ri+4Ksu83VsI+PlxNC9lNBfydejce4=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "624af665418d3c65d544145b4d34ad696439570e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-unstable_2": {
       "locked": {
         "lastModified": 1785090369,
         "narHash": "sha256-m0pDuRJG7EDo9ri+4Ksu83VsI+PlxNC9lNBfydejce4=",
@@ -371,11 +559,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1785153053,
-        "narHash": "sha256-V4ticL+BegTLS1T7iajg11+SVKWOpBDJk3H4eCCNa3E=",
+        "lastModified": 1785460954,
+        "narHash": "sha256-BWf88Ex5dBN6uk/51YRA/pR+FY9zfxmSKqnG55NxKwI=",
         "ref": "refs/heads/master",
-        "rev": "34203007735a55ff75ccf53b219cc59237cb549d",
-        "revCount": 24,
+        "rev": "9f88815bb640f1823634f62601a74c4e052363b0",
+        "revCount": 29,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/secrets.git"
       },
@@ -384,7 +572,54 @@
         "url": "https://forge.anarch.diy/allod/secrets.git"
       }
     },
+    "spectrum": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1783694892,
+        "narHash": "sha256-xO8f7Qng+18FK2UlB9vcrkxCaQMCt5WjCH24aW/11eg=",
+        "ref": "refs/heads/main",
+        "rev": "24c4346e30fdea8d8e80f34aec3554a15a667d24",
+        "revCount": 1410,
+        "type": "git",
+        "url": "https://spectrum-os.org/git/spectrum"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://spectrum-os.org/git/spectrum"
+      }
+    },
+    "spectrum_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1783694892,
+        "narHash": "sha256-xO8f7Qng+18FK2UlB9vcrkxCaQMCt5WjCH24aW/11eg=",
+        "ref": "refs/heads/main",
+        "rev": "24c4346e30fdea8d8e80f34aec3554a15a667d24",
+        "revCount": 1410,
+        "type": "git",
+        "url": "https://spectrum-os.org/git/spectrum"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://spectrum-os.org/git/spectrum"
+      }
+    },
     "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_2": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
@@ -404,15 +639,43 @@
         "agenix": "agenix",
         "disko": "disko",
         "home-manager": "home-manager_2",
-        "nixpkgs": "nixpkgs",
+        "microvm": "microvm",
+        "nixpkgs": [
+          "archetypes",
+          "nexus",
+          "nixpkgs"
+        ],
         "nixpkgs-unstable": "nixpkgs-unstable"
       },
       "locked": {
-        "lastModified": 1785283849,
-        "narHash": "sha256-kEoHDN9LT8mFB7ZUasYzvKFh37ZVKLC9osMFtClB4Oc=",
+        "lastModified": 1785415961,
+        "narHash": "sha256-4ma5G+2YbWq/9UbpkFxpLSXhnft2iGEAdNsswwhZAac=",
         "ref": "refs/heads/master",
-        "rev": "2acc559c0616f139c5b5c33c96a44d4ba6d4b2af",
-        "revCount": 5,
+        "rev": "8a1eb0f3e5300b320e54b802fbdbedb6a7b62c0f",
+        "revCount": 8,
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/vm.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://forge.anarch.diy/allod/vm.git"
+      }
+    },
+    "vm_2": {
+      "inputs": {
+        "agenix": "agenix_2",
+        "disko": "disko_2",
+        "home-manager": "home-manager_4",
+        "microvm": "microvm_2",
+        "nixpkgs": "nixpkgs",
+        "nixpkgs-unstable": "nixpkgs-unstable_2"
+      },
+      "locked": {
+        "lastModified": 1785415961,
+        "narHash": "sha256-4ma5G+2YbWq/9UbpkFxpLSXhnft2iGEAdNsswwhZAac=",
+        "ref": "refs/heads/master",
+        "rev": "8a1eb0f3e5300b320e54b802fbdbedb6a7b62c0f",
+        "revCount": 8,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/vm.git"
       },
