@@ -108,11 +108,11 @@
         "vm": "vm_2"
       },
       "locked": {
-        "lastModified": 1787282031,
-        "narHash": "sha256-oPHwh9aNCMVUtxjdHVdzClwqFKqvF5Nw4B6yBvqQ7U4=",
+        "lastModified": 1787283059,
+        "narHash": "sha256-UC/HRVn1Aw7fsrsg7Gh5a9K62rTZzD/lc9xhN0+TwuA=",
         "ref": "refs/heads/master",
-        "rev": "f7f37dae04607cc2c736df050b9d6d04ec78547f",
-        "revCount": 66,
+        "rev": "3811b3e69dbd96d033db2bf35b9831494699c153",
+        "revCount": 67,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/archetypes.git"
       },
@@ -393,11 +393,11 @@
         "vm": "vm"
       },
       "locked": {
-        "lastModified": 1785797588,
-        "narHash": "sha256-zOIQKEIae3d73EJN+13hxTy9ISs6/XwrfEvKuWi5bbE=",
-        "ref": "refs/heads/master",
-        "rev": "a66ea960cd018bc1e31de8a30cb649f1dc1e8194",
-        "revCount": 25,
+        "lastModified": 1787280339,
+        "narHash": "sha256-nfHhFZpEKS2NL96PUo8y0tjzAiXDAYiTOau7cl+7nR0=",
+        "ref": "agent/pi-provider-lifecycle",
+        "rev": "dc503fa27374711bb8d0321140e328f48e503a49",
+        "revCount": 36,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/nexus.git"
       },
