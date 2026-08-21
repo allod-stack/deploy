@@ -3,8 +3,9 @@
 
   # Deployment root: the flake you build to stand up your machines. It pins the
   # `archetypes` framework and the `profiles`/`secrets`/`inventory` data repos,
-  # and redirects the framework's own `profiles`/`secrets`/`inventory` inputs at
-  # these via `follows`. This public template points them at the allod/* synthetic
+  # and redirects the framework's own `profiles`/`secrets`/`inventory` inputs and
+  # the secrets registry's inventory input at these via `follows`. This public
+  # template points them at the allod/* synthetic
   # templates and builds the example fleet as-is; a fork changes exactly the three
   # data input URLs (`profiles`, `secrets`, `inventory`) and nothing else — the
   # "nothing else differs" charter, now enforceable by diff against this template.
@@ -19,17 +20,34 @@
     archetypes.inputs.profiles.follows  = "profiles";
     archetypes.inputs.secrets.follows   = "secrets";
     archetypes.inputs.inventory.follows = "inventory";
+    secrets.inputs.inventory.follows    = "inventory";
 
     # pkgs for the composed-layer canary only; follows the framework's nixpkgs so
     # this template pins no divergent nixpkgs.
     nixpkgs.follows = "archetypes/nixpkgs";
   };
 
-  outputs = { self, nixpkgs, archetypes, profiles, inventory, ... }:
+  outputs = { self, nixpkgs, archetypes, profiles, secrets, inventory, ... }:
     let
       # Derive the checked systems from the inventory source of truth rather than
       # hard-coding architecture strings.
       systems = inventory.lib.supportedPlatforms;
+      expectedSources = {
+        expectedProfiles = profiles;
+        expectedSecrets = secrets;
+        expectedInventory = inventory;
+      };
+      sabotageObservedSource = observation:
+        !(builtins.tryEval (archetypes.lib.validateComposedLayerSources
+          (expectedSources // { "${observation}" = "/sabotaged-${observation}"; }))).success;
+      followsSabotage = {
+        profiles = sabotageObservedSource "observedProfiles";
+        secrets = sabotageObservedSource "observedSecrets";
+        inventory = sabotageObservedSource "observedInventory";
+        secretsInventory = sabotageObservedSource "observedSecretsInventory";
+      };
+      ineffectiveSabotage = builtins.attrNames
+        (nixpkgs.lib.filterAttrs (_: failed: !failed) followsSabotage);
     in {
       nixosConfigurations = archetypes.nixosConfigurations;
 
@@ -37,15 +55,16 @@
       # DEPLOY_FLAKE#vmFacts; re-export the composed facts from archetypes.
       vmFacts = archetypes.vmFacts;
 
-      # Generic composed-layer canary: fails loudly when the archetypes framework
-      # composed a different profiles than this deploy flake pins — i.e. when the
-      # `archetypes.inputs.profiles.follows = "profiles"` redirect above is lost or
-      # dropped in a fork. Builds green here because the redirect is intact.
+      # Generic composed-layer canary: compares every consumed data source with
+      # this deployment's pins. The four pure sabotage calls above replace one
+      # observation at a time and must each trip the same validator used here.
       checks = nixpkgs.lib.genAttrs systems (system: {
-        composed-layer = archetypes.lib.composedLayerCheck {
-          pkgs = nixpkgs.legacyPackages.${system};
-          expectedProfiles = profiles;
-        };
+        composed-layer =
+          assert nixpkgs.lib.assertMsg (ineffectiveSabotage == [])
+            "composed-layer sabotage did not reject: ${nixpkgs.lib.concatStringsSep ", " ineffectiveSabotage}";
+          archetypes.lib.composedLayerCheck ({
+            pkgs = nixpkgs.legacyPackages.${system};
+          } // expectedSources);
       });
     };
 }
