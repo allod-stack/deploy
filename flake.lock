@@ -28,11 +28,11 @@
     "allod-tools": {
       "flake": false,
       "locked": {
-        "lastModified": 1787362928,
-        "narHash": "sha256-3lBCotdwHNZAnyOdGlK9KfDsmA2joiMwu4pDTQarMBg=",
+        "lastModified": 1787365004,
+        "narHash": "sha256-R6rdo3xrGEjqUjRiSRRRsapRvWAWl2qajn3ehGtjDDg=",
         "ref": "refs/heads/master",
-        "rev": "09fb988b9b74329802685bb1bf265bb5cf647b06",
-        "revCount": 160,
+        "rev": "36f5d9bdffdbe3a88ace3ecdbc9d4cb89c2b94a6",
+        "revCount": 161,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/tools.git"
       },
@@ -270,11 +270,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787087602,
-        "narHash": "sha256-uf+pLgVY4sF4KhteH000PfxsHpiGYXJYjsl5zhvHWiA=",
+        "lastModified": 1787364883,
+        "narHash": "sha256-J5VFCgVTPPPb9HwS2FXpkdhy2t7zvS7vWx34JKvp+tU=",
         "ref": "refs/heads/master",
-        "rev": "2ba22f34e28a0b9f10ade93ff803b4f3ad36f320",
-        "revCount": 27,
+        "rev": "83af9d2fa4cf9ffe09f7e89730910bdba64df33b",
+        "revCount": 28,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/nexus.git"
       },
