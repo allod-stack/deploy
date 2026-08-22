@@ -380,11 +380,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1787278501,
-        "narHash": "sha256-TtZxiWm6YQbxRAcl/asIv3Q627Th7myKeSQuT2IjJ4U=",
+        "lastModified": 1787368669,
+        "narHash": "sha256-ClTXI1GW1ataRlEzNN1cDlqGuUo+gx5Ro8H4WIfHNs8=",
         "ref": "refs/heads/master",
-        "rev": "2692bef3714c9f43e60fadd99f08487200ccd42b",
-        "revCount": 32,
+        "rev": "3885c83119583fe6ee400e24fd514e09bd0a815f",
+        "revCount": 33,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/secrets.git"
       },
