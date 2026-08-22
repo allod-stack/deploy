@@ -28,11 +28,11 @@
     "allod-tools": {
       "flake": false,
       "locked": {
-        "lastModified": 1787365004,
-        "narHash": "sha256-R6rdo3xrGEjqUjRiSRRRsapRvWAWl2qajn3ehGtjDDg=",
+        "lastModified": 1787418704,
+        "narHash": "sha256-K3JvipCTQyUEPf6aLB3pXA+hTgXTkQPSBvwgY8ULDCI=",
         "ref": "refs/heads/master",
-        "rev": "36f5d9bdffdbe3a88ace3ecdbc9d4cb89c2b94a6",
-        "revCount": 161,
+        "rev": "93eb4baee4d74855eb451a415006d1ca26f3a6ad",
+        "revCount": 162,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/tools.git"
       },

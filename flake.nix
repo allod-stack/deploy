@@ -156,9 +156,19 @@
             "composed-layer: Pi per-target credential projections drifted";
           assert nixpkgs.lib.assertMsg (rejects defaultSabotage)
             "composed-layer: invalid Pi token default sabotage was accepted";
-          archetypes.lib.composedLayerCheck ({
-            pkgs = nixpkgs.legacyPackages.${system};
-          } // expectedSources);
+          let
+            composedCanary = archetypes.lib.composedLayerCheck ({
+              pkgs = nixpkgs.legacyPackages.${system};
+            } // expectedSources);
+            # The archetypes lifecycle witness evaluated through this flake's
+            # follows-redirected inputs: generated activation and secret
+            # projections are exercised on the composed graph, not upstream's
+            # own checkout.
+            composedLifecycle = archetypes.checks.${system}.pi-provider-lifecycle;
+          in
+          nixpkgs.legacyPackages.${system}.runCommand "composed-layer-check" {
+            inherit composedCanary composedLifecycle;
+          } "touch $out";
       });
     };
 }
