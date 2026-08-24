@@ -249,11 +249,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787577613,
-        "narHash": "sha256-6JH43CW/8EGpG5yHyBLGQlvG6RhAdG6mhZ4t4PBVkY8=",
+        "lastModified": 1787609240,
+        "narHash": "sha256-RWsRUJn8lEzdsNu9RjuuK1aKkemxrOXbDB8YZbDAX6Y=",
         "ref": "refs/heads/master",
-        "rev": "da06e247698c4a1ec82fb5220237ae9c46707bce",
-        "revCount": 43,
+        "rev": "1e201eae7a2e0483bc64e9997e42b72b84478626",
+        "revCount": 45,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/nexus.git"
       },
