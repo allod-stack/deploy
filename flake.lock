@@ -82,11 +82,11 @@
         "vm": "vm"
       },
       "locked": {
-        "lastModified": 1788862382,
-        "narHash": "sha256-PJaERFSPf9pJCHVPIRTzTy1T/vp544kjhKM17MHm7MM=",
+        "lastModified": 1788876721,
+        "narHash": "sha256-J00+HVZhkMqZ6ZLOJO4XcTClOHWQJlMNULgsTSClN7I=",
         "ref": "refs/heads/master",
-        "rev": "a8971d5d7fd8424834e23e540795ec6c1ac73190",
-        "revCount": 125,
+        "rev": "81b67ae6c510200779f6fb82f8528f64a20e227a",
+        "revCount": 127,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/archetypes.git"
       },
@@ -192,41 +192,17 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1788793125,
-        "narHash": "sha256-ZaguaEhHiIUF8k49xD3VRfQTpWqRgeVFoGQL5CIVJp8=",
+        "lastModified": 1788865498,
+        "narHash": "sha256-O1Js5U9f3gBQhkjwGLPoh3Btu/psfHiG09UM/qmsSww=",
         "ref": "refs/heads/master",
-        "rev": "e7a923c005e06861a3de2f71c6dd0ae39c05b3ba",
-        "revCount": 23,
+        "rev": "7a12fbd36c6abbf7e9ddd041a7f005f62a939995",
+        "revCount": 24,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/inventory.git"
       },
       "original": {
         "type": "git",
         "url": "https://forge.anarch.diy/allod/inventory.git"
-      }
-    },
-    "microvm": {
-      "inputs": {
-        "nixpkgs": [
-          "archetypes",
-          "vm",
-          "nixpkgs"
-        ],
-        "spectrum": "spectrum"
-      },
-      "locked": {
-        "lastModified": 1785246989,
-        "narHash": "sha256-7CjGBACbXXIJvGrPed75QI8ytqc48M78GP9aB/h2VSc=",
-        "owner": "microvm-nix",
-        "repo": "microvm.nix",
-        "rev": "39a499ab85311b56dddb09ec43351cc3658f22c1",
-        "type": "github"
-      },
-      "original": {
-        "owner": "microvm-nix",
-        "repo": "microvm.nix",
-        "rev": "39a499ab85311b56dddb09ec43351cc3658f22c1",
-        "type": "github"
       }
     },
     "nexus": {
@@ -242,18 +218,14 @@
         "nixpkgs": [
           "archetypes",
           "nixpkgs"
-        ],
-        "vm": [
-          "archetypes",
-          "vm"
         ]
       },
       "locked": {
-        "lastModified": 1788796223,
-        "narHash": "sha256-XcMPOBaStm8xX86hXWdUnkTHOycib254vY3/RkRIDt0=",
+        "lastModified": 1788865285,
+        "narHash": "sha256-kEZhpGAySqxwnX+TgxHLXONABH0r0GE2VhatFYM2OVs=",
         "ref": "refs/heads/master",
-        "rev": "a2c9d8ba26dbb7268c1d70892f4f0afd2617c286",
-        "revCount": 53,
+        "rev": "331ba8e494934ac6a517c226f31486c12413a6e6",
+        "revCount": 54,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/nexus.git"
       },
@@ -393,22 +365,6 @@
         "url": "https://forge.anarch.diy/allod/secrets.git"
       }
     },
-    "spectrum": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1783694892,
-        "narHash": "sha256-xO8f7Qng+18FK2UlB9vcrkxCaQMCt5WjCH24aW/11eg=",
-        "ref": "refs/heads/main",
-        "rev": "24c4346e30fdea8d8e80f34aec3554a15a667d24",
-        "revCount": 1410,
-        "type": "git",
-        "url": "https://spectrum-os.org/git/spectrum"
-      },
-      "original": {
-        "type": "git",
-        "url": "https://spectrum-os.org/git/spectrum"
-      }
-    },
     "systems": {
       "locked": {
         "lastModified": 1681028828,
@@ -429,16 +385,15 @@
         "agenix": "agenix",
         "disko": "disko",
         "home-manager": "home-manager_2",
-        "microvm": "microvm",
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable"
       },
       "locked": {
-        "lastModified": 1788793076,
-        "narHash": "sha256-bGpr4AFbrSJCkgmWTpRwqTdyhqeOMh2bG5Tc+WQoaHo=",
+        "lastModified": 1788865456,
+        "narHash": "sha256-024kqnEq65Du5g0aj6B3pp/HVBbTDb0VuW9FsS+nl24=",
         "ref": "refs/heads/master",
-        "rev": "e4e11e43c2eb91c7346a4d3f3bbb8d21dd203499",
-        "revCount": 11,
+        "rev": "251f90658e586efa58afd3130346d027eb564c6e",
+        "revCount": 12,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/vm.git"
       },
