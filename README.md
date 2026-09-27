@@ -21,6 +21,23 @@ nixos-rebuild switch --flake .#<machine> --target-host <user>@<ip> --sudo
 `flake.lock` pins exact `archetypes`, `profiles`, `secrets`, and `inventory`
 revisions, so the build and the host-key preflight agree on one source of truth.
 
+## Check
+
+```
+./check.sh
+```
+
+`./check.sh` replaces `nix flake check` for this repo. The native command
+evaluates every machine and every check in one process, and a fork with a real
+fleet is OOM-killed on an 8 GiB dev VM before it reaches the end of the check
+list. The script runs the framework's gate from the `archetypes` revision
+`flake.lock` pins: one `nix` process per machine and per check, every check
+built rather than only evaluated, and one run reports every failing step.
+
+It takes no arguments. To prove an unmerged data-repo branch, force the checks
+that read it one at a time with
+`nix build .#checks.<system>.<name> --override-input <input> <worktree> --no-write-lock-file`.
+
 ## Fork
 
 1. Fork this repo.
