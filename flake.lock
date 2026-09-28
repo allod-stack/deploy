@@ -28,11 +28,11 @@
     "allod-tools": {
       "flake": false,
       "locked": {
-        "lastModified": 1790481455,
-        "narHash": "sha256-POrKXQMOn7U89GWnTGXUsv41CA7vg1Mcr1F0Y0ULxQ4=",
+        "lastModified": 1790604023,
+        "narHash": "sha256-Yy6xGWjFjH4hWDaJ8q0OqLDGvTDRjrKiwsTbiRbTqwc=",
         "ref": "refs/heads/master",
-        "rev": "fba2d5278d2da74655c0fd443936babc3668c299",
-        "revCount": 281,
+        "rev": "2caeb5e99d29416bf576bdfad48af8e424eb22e0",
+        "revCount": 297,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/tools.git"
       },
@@ -82,11 +82,11 @@
         "vm": "vm"
       },
       "locked": {
-        "lastModified": 1790483502,
-        "narHash": "sha256-7nKq/ZHpQfS5V5kmn3yZXhaWiyUdEtKZ8qjjrPZCZNo=",
+        "lastModified": 1790604032,
+        "narHash": "sha256-r1h+p9GtJ9ge84n3AEkEdSiSwiwXhz+b4gXeX49EDZQ=",
         "ref": "refs/heads/master",
-        "rev": "9c671b657bdc3d5d045770370eddacc68c4cbeee",
-        "revCount": 240,
+        "rev": "9577fb59e8d4e024b07a646a70461a50d6b6e4b5",
+        "revCount": 242,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/archetypes.git"
       },
@@ -187,11 +187,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1790187053,
-        "narHash": "sha256-p36gFMJnzaZGWDFzXKVS3XCi430jeZ0lR+Jq27fVgT8=",
+        "lastModified": 1790550606,
+        "narHash": "sha256-5IMVjil9lqJJPKmUj6dxNpWMbMsSAXu3Gs7baFk3cAU=",
         "ref": "refs/heads/master",
-        "rev": "0dfe49f4342278b0b6fbe33d5ee67ff69b6139c5",
-        "revCount": 27,
+        "rev": "87a8795caaeb63dbfe588371d573b2b8e8e5d61d",
+        "revCount": 28,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/inventory.git"
       },
@@ -361,11 +361,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1790187083,
-        "narHash": "sha256-N/Ddvt2n09+5LMzIZETvXMz0nJlMZzwRGNnKPV7KCJ0=",
+        "lastModified": 1790604018,
+        "narHash": "sha256-iShEQjatYPU/HKoboyuZzklX3B1jFc/chL16GSALeqA=",
         "ref": "refs/heads/master",
-        "rev": "f6db5f90b353e5657f7c0af08c13aa0d2b4a2b3c",
-        "revCount": 65,
+        "rev": "a5e32f446699ff044ae654549297430aa5e7f537",
+        "revCount": 66,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/secrets.git"
       },
