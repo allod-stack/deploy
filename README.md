@@ -24,19 +24,19 @@ revisions, so the build and the host-key preflight agree on one source of truth.
 ## Check
 
 ```
-./check.sh
+allod check
 ```
 
-`./check.sh` replaces `nix flake check` for this repo. The native command
-evaluates every machine and every check in one process, and a fork with a real
-fleet is OOM-killed on an 8 GiB dev VM before it reaches the end of the check
-list. The script runs the framework's gate from the `archetypes` revision
-`flake.lock` pins: one `nix` process per machine and per check, every check
-built rather than only evaluated, and one run reports every failing step.
+`allod check` replaces `nix flake check` for this repo, because the native
+command evaluates every machine and every check in one process and a fork with a
+real fleet is OOM-killed on an 8 GiB dev VM before it reaches the end of the
+check list. To run the whole gate against a data-repo branch before it merges:
 
-It takes no arguments. To prove an unmerged data-repo branch, force the checks
-that read it one at a time with
-`nix build .#checks.<system>.<name> --override-input <input> <worktree> --no-write-lock-file`.
+```
+allod check --override-input <input> <worktree>
+```
+
+See `docs/allod-check.md` in `allod/tools` for the rest.
 
 ## Fork
 
