@@ -12,6 +12,25 @@ them via `follows`. This template points all three at the `allod/*` synthetic
 templates, so it evaluates the example fleet as-is; a fork points them at its
 own repos to build real machines. Nothing else differs.
 
+## Getting started
+
+From a fresh NixOS install to a hypervisor with one dev VM, no forge
+account needed. On the machine, as the user you log in as:
+
+```
+curl -O https://forge.anarch.diy/allod/deploy/raw/branch/master/getting-started.sh
+bash getting-started.sh
+```
+
+It clones the public repos under `~/work/allod/`, uses this machine's own
+`/etc/nixos/hardware-configuration.nix` as the hypervisor hardware, generates
+the host identity and fresh VM host keys, takes the dev VM out of forge access
+with every repo host-provided, points this flake's three data inputs at the
+local clones, builds the installer image, and makes the hypervisor the next
+boot. The header of the script lists each step. Then reboot, log in as the
+same user, and `provision-vm allod-dev`. Firmware must be UEFI with Secure
+Boot off; the stock installer already required that.
+
 ## Build
 
 ```
