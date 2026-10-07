@@ -166,8 +166,23 @@ fi
 
 step "Guest addresses on libvirt's default network"
 # The template uses documentation addresses; libvirt's default network, which
-# new-vm reserves leases on, is 192.168.122.0/24.
-sed -i -E 's/"192\.0\.2\.(2|10|11)"/"192.168.122.\1"/' "${INVENTORY}/flake.nix" "${SECRETS}/identity.nix"
+# new-vm reserves leases on, is 192.168.122.0/24. Inventory's own machines
+# move; its example external hosts and check fixtures, on the same range on
+# purpose, do not.
+mapfile -t MACHINE_IPS < <(
+  nix eval --json "path:${INVENTORY}#machines" --apply 'builtins.mapAttrs (_: m: m.ip)' \
+    | jq -r '.[]'
+)
+for ip in "${MACHINE_IPS[@]}"; do
+  [[ "$ip" == 192.0.2.* ]] || continue
+  sed -i "s|\"${ip//./\\.}\"|\"192.168.122.${ip##*.}\"|g" "${INVENTORY}/flake.nix" "${SECRETS}/identity.nix"
+done
+leftover=""
+for ip in "${MACHINE_IPS[@]}"; do
+  [[ "$ip" == 192.0.2.* ]] || continue
+  leftover+=$(grep -oF "\"${ip}\"" "${INVENTORY}/flake.nix" "${SECRETS}/identity.nix" || true)
+done
+[[ -z "$leftover" ]] || die "machine still on the documentation subnet: ${leftover}"
 if [[ -n "$(git -C "$INVENTORY" status --porcelain)$(git -C "$SECRETS" status --porcelain)" ]]; then
   git_commit "$INVENTORY" "getting-started: guests on libvirt's default network"
   git_commit "$SECRETS" "getting-started: guests on libvirt's default network"
