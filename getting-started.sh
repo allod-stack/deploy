@@ -25,17 +25,12 @@
 #   5. builds the installer image the VMs boot from, into ~/iso/
 #   6. builds the hypervisor configuration and makes it the next boot
 #
-# A second run, `bash getting-started.sh --forge`, after provisioning a forge
-# VM and running `forge-sync forge` on the host, points the dev VM at that
-# forge instead of staying forge-less:
-#   a. identity.nix's forgeHost/forgePort/forgeUrl move from the public forge
-#      to the forge VM's own address
-#   b. the dev VM gets its forge_key back and loses host_provided_repos,
-#      regenerating scripts/vm-specs.json
-#   c. the three data inputs are re-locked the same way step 4 does
-# then it names `provision-vm --replace allod-dev` as the next step and
-# stops; it does not build anything, because the hypervisor itself did not
-# change. `--forge` and `--prepare-only` may be combined.
+# A second run, `bash getting-started.sh --forge` (combinable with
+# --prepare-only; see the README for the precondition):
+#   a. moves identity.nix's forgeHost/forgePort/forgeUrl to the forge VM
+#   b. restores allod-dev's forge_key and drops host_provided_repos
+#   c. re-locks the three data inputs the same way step 4 does
+# then names `provision-vm --replace allod-dev` as the next step and stops.
 #
 # The account that runs this stays the operator account: NixOS keeps mutable
 # users, so its uid, password and home survive the switch. Only step 6 needs
@@ -99,25 +94,47 @@ git_commit() {
 }
 
 # `nix flake update` exits 0 even when it silently skips a dirty clone's
-# input, so verify each input's locked rev against the clone's HEAD too.
+# input, so verify each input's locked rev against the clone's HEAD before
+# trusting the lock enough to commit it. Resolve the node through root's own
+# input map, not by input name: a `follows`-renamed node (e.g. inventory_2)
+# would otherwise read a stale or unrelated node silently.
 relock_data_inputs() {
-  local input dirty locked head
+  local input dirty node locked head
   for input in "${DATA_INPUTS[@]}"; do
     dirty=$(git -C "${WORK}/${input}" status --porcelain)
     [[ -z "$dirty" ]] || die "${WORK}/${input} is dirty; nix flake update would silently skip it"
   done
   (cd "$DEPLOY" && nix flake update --refresh "${DATA_INPUTS[@]}")
+  for input in "${DATA_INPUTS[@]}"; do
+    node=$(jq -r --arg n "$input" '.nodes.root.inputs[$n] // empty' "${DEPLOY}/flake.lock")
+    [[ -n "$node" ]] || die "${input}: flake.lock's root has no input named ${input}"
+    locked=$(jq -r --arg n "$node" '.nodes[$n].locked.rev // empty' "${DEPLOY}/flake.lock")
+    head=$(git -C "${WORK}/${input}" rev-parse HEAD)
+    [[ "$locked" == "$head" ]] \
+      || die "${input}: flake.lock pins ${locked}, clone HEAD is ${head}"
+  done
   if [[ -n "$(git -C "$DEPLOY" status --porcelain)" ]]; then
     git_commit "$DEPLOY" "getting-started: lock the local clones
 
 Refs allod/deploy#9"
   fi
-  for input in "${DATA_INPUTS[@]}"; do
-    locked=$(jq -r --arg n "$input" '.nodes[$n].locked.rev // empty' "${DEPLOY}/flake.lock")
-    head=$(git -C "${WORK}/${input}" rev-parse HEAD)
-    [[ "$locked" == "$head" ]] \
-      || die "${input}: flake.lock pins ${locked}, clone HEAD is ${head}"
-  done
+}
+
+# Regenerates scripts/vm-specs.json from the current inventory and commits it
+# under $1 if it changed, so a run that died between an inventory sed and
+# this call is repaired by the next run reaching it.
+regenerate_vm_specs() {
+  local specs_tmp
+  specs_tmp=$(mktemp)
+  nix eval --raw "path:${INVENTORY}#lib.vmSpecsJson" | jq -S . > "$specs_tmp"
+  if cmp -s "$specs_tmp" "${INVENTORY}/scripts/vm-specs.json"; then
+    rm -f "$specs_tmp"
+    printf '  already declared\n'
+  else
+    mv "$specs_tmp" "${INVENTORY}/scripts/vm-specs.json"
+    git_commit "$INVENTORY" "$1"
+    printf '  declared\n'
+  fi
 }
 
 # --- 1. clone ----------------------------------------------------------------
@@ -244,7 +261,9 @@ fi
 if $FORGE; then
   step "Forge host identity"
   FORGE_IP=$(nix eval --json "path:${INVENTORY}#machines" --apply 'm: m.forge.ip' | jq -r .)
-  if grep -q "  forgeUrl = \"http://${FORGE_IP}\";" "${SECRETS}/identity.nix"; then
+  if grep -q "  forgeHost = \"${FORGE_IP}\";" "${SECRETS}/identity.nix" \
+    && grep -q "  forgePort = 2222;" "${SECRETS}/identity.nix" \
+    && grep -q "  forgeUrl = \"http://${FORGE_IP}\";" "${SECRETS}/identity.nix"; then
     printf '  already keyed to %s\n' "$FORGE_IP"
   else
     # Whole-line seds on the template's fixed shape; forgeUrl may predate
@@ -269,39 +288,31 @@ if $FORGE; then
   fi
 
   step "Dev VM ${DEV_VM} pointed at its own forge"
-  if grep -q '^\( *\)forge_key = "allod_vm";' "${INVENTORY}/flake.nix" \
-    && ! grep -q 'host_provided_repos = \[ "allod/tools"' "${INVENTORY}/flake.nix"; then
-    printf '  already declared\n'
-  else
-    # forge_key = null; recurs on every other machine, so the flip is scoped
-    # to the ${DEV_VM} block, not matched bare.
+  if ! grep -q '^\( *\)forge_key = "allod_vm";' "${INVENTORY}/flake.nix" \
+    || grep -q 'host_provided_repos = \[ "allod/tools"' "${INVENTORY}/flake.nix"; then
+    # forge_key = null; recurs on every other machine, so both edits are
+    # scoped to the ${DEV_VM} block, not matched bare.
     sed -i \
       -e "/^        ${DEV_VM} = {/,/^        };/{s|^\( *\)forge_key = null;|\1forge_key = \"allod_vm\";|}" \
-      -e '/host_provided_repos = \[ "allod\/tools"/d' \
+      -e "/^        ${DEV_VM} = {/,/^        };/{/host_provided_repos = \[ \"allod\/tools\"/d}" \
       "${INVENTORY}/flake.nix"
     grep -q '^\( *\)forge_key = "allod_vm";' "${INVENTORY}/flake.nix" \
       || die "could not restore forge_key in ${INVENTORY}/flake.nix"
     grep -q 'host_provided_repos = \[ "allod/tools"' "${INVENTORY}/flake.nix" \
       && die "host_provided_repos still declared in ${INVENTORY}/flake.nix"
-    nix eval --raw "path:${INVENTORY}#lib.vmSpecsJson" | jq -S . > "${INVENTORY}/scripts/vm-specs.json"
-    git_commit "$INVENTORY" "getting-started: ${DEV_VM} forge_key restored, host-provided repos dropped"
-    printf '  declared\n'
   fi
+  regenerate_vm_specs "getting-started: ${DEV_VM} forge_key restored, host-provided repos dropped"
 else
   step "Dev VM ${DEV_VM} built from the local clones, no forge key"
-  if grep -q 'host_provided_repos = \[ "allod/tools"' "${INVENTORY}/flake.nix"; then
-    printf '  already declared\n'
-  else
+  if ! grep -q 'host_provided_repos = \[ "allod/tools"' "${INVENTORY}/flake.nix"; then
     sed -i \
       -e "s|^\( *\)forge_key = \"allod_vm\";|\1forge_key = null;|" \
       -e "s|^\( *\)repos = \(\[ \"allod/tools\".*\];\)|\1repos = \2\n\1host_provided_repos = \2|" \
       "${INVENTORY}/flake.nix"
     grep -q 'host_provided_repos = \[ "allod/tools"' "${INVENTORY}/flake.nix" \
       || die "could not declare host_provided_repos in ${INVENTORY}/flake.nix"
-    nix eval --raw "path:${INVENTORY}#lib.vmSpecsJson" | jq -S . > "${INVENTORY}/scripts/vm-specs.json"
-    git_commit "$INVENTORY" "getting-started: ${DEV_VM} is host-provided and forge-less"
-    printf '  declared\n'
   fi
+  regenerate_vm_specs "getting-started: ${DEV_VM} is host-provided and forge-less"
 fi
 
 # --- 4. deploy inputs --------------------------------------------------------
