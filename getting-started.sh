@@ -79,7 +79,11 @@ done
 if [[ -z "${ALLOD_GETTING_STARTED_SHELL:-}" ]]; then
   export ALLOD_GETTING_STARTED_SHELL=1
   printf 'Fetching git, age and jq...\n'
-  exec nix-shell -p git age jq --run "bash $(printf '%q' "$0") $(printf '%q ' "$@")"
+  # printf '%q ' with no operands still prints '', which the re-exec would
+  # receive as one empty argument; build the list only from real arguments.
+  reexec_args=""
+  for a in "$@"; do reexec_args+=" $(printf '%q' "$a")"; done
+  exec nix-shell -p git age jq --run "bash $(printf '%q' "$0")${reexec_args}"
 fi
 
 for tool in git age jq ssh-keygen nix nixos-rebuild; do
