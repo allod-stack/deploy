@@ -20,9 +20,22 @@
 #      for every VM, each encrypted to it; takes the dev VM out of forge
 #      access and makes every one of its repos host-provided, so the VM is
 #      built from these clones and no forge credential exists anywhere
-#   4. points the deploy clone's three data inputs at the local clones
+#   4. points the deploy clone's three data inputs at the local clones and
+#      re-locks them, verifying each pinned revision reaches the clone's HEAD
 #   5. builds the installer image the VMs boot from, into ~/iso/
 #   6. builds the hypervisor configuration and makes it the next boot
+#
+# A second run, `bash getting-started.sh --forge`, after provisioning a forge
+# VM and running `forge-sync forge` on the host, points the dev VM at that
+# forge instead of staying forge-less:
+#   a. identity.nix's forgeHost/forgePort/forgeUrl move from the public forge
+#      to the forge VM's own address
+#   b. the dev VM gets its forge_key back and loses host_provided_repos,
+#      regenerating scripts/vm-specs.json
+#   c. the three data inputs are re-locked the same way step 4 does
+# then it names `provision-vm --replace allod-dev` as the next step and
+# stops; it does not build anything, because the hypervisor itself did not
+# change. `--forge` and `--prepare-only` may be combined.
 #
 # The account that runs this stays the operator account: NixOS keeps mutable
 # users, so its uid, password and home survive the switch. Only step 6 needs
@@ -51,7 +64,15 @@ step() { printf '\n==> %s\n' "$*"; }
 
 # --- 0. preconditions --------------------------------------------------------
 
-[[ "${1:-}" == "--prepare-only" ]] && PREPARE_ONLY=true || PREPARE_ONLY=false
+PREPARE_ONLY=false
+FORGE=false
+for arg in "$@"; do
+  case "$arg" in
+    --prepare-only) PREPARE_ONLY=true ;;
+    --forge) FORGE=true ;;
+    *) die "unknown argument: ${arg}" ;;
+  esac
+done
 
 [[ "$(id -u)" -ne 0 ]] \
   || die "run this as the user you will log in as, not as root"
@@ -77,6 +98,28 @@ git_commit() {
     commit -q -m "$@"
 }
 
+# `nix flake update` exits 0 even when it silently skips a dirty clone's
+# input, so verify each input's locked rev against the clone's HEAD too.
+relock_data_inputs() {
+  local input dirty locked head
+  for input in "${DATA_INPUTS[@]}"; do
+    dirty=$(git -C "${WORK}/${input}" status --porcelain)
+    [[ -z "$dirty" ]] || die "${WORK}/${input} is dirty; nix flake update would silently skip it"
+  done
+  (cd "$DEPLOY" && nix flake update --refresh "${DATA_INPUTS[@]}")
+  if [[ -n "$(git -C "$DEPLOY" status --porcelain)" ]]; then
+    git_commit "$DEPLOY" "getting-started: lock the local clones
+
+Refs allod/deploy#9"
+  fi
+  for input in "${DATA_INPUTS[@]}"; do
+    locked=$(jq -r --arg n "$input" '.nodes[$n].locked.rev // empty' "${DEPLOY}/flake.lock")
+    head=$(git -C "${WORK}/${input}" rev-parse HEAD)
+    [[ "$locked" == "$head" ]] \
+      || die "${input}: flake.lock pins ${locked}, clone HEAD is ${head}"
+  done
+}
+
 # --- 1. clone ----------------------------------------------------------------
 
 step "Public repos under ${WORK}"
@@ -93,6 +136,13 @@ done
 INVENTORY="${WORK}/inventory"
 SECRETS="${WORK}/secrets"
 DEPLOY="${WORK}/deploy"
+
+if $FORGE; then
+  [[ -f "${SECRETS}/secrets/allod-dev-forge-key.age" && -f "${SECRETS}/secrets/agent-pr-token.age" ]] \
+    && jq -e '.allod_vm' "${SECRETS}/forge-ssh-keys.json" >/dev/null 2>&1 \
+    && grep -q '^      forgeAccess = true;' "${SECRETS}/identity.nix" \
+    || die "run 'forge-sync forge' first: ${SECRETS} is not yet keyed to a forge VM"
+fi
 
 # --- 2. hardware -------------------------------------------------------------
 
@@ -191,19 +241,67 @@ else
   printf '  already there\n'
 fi
 
-step "Dev VM ${DEV_VM} built from the local clones, no forge key"
-if grep -q 'host_provided_repos = \[ "allod/tools"' "${INVENTORY}/flake.nix"; then
-  printf '  already declared\n'
+if $FORGE; then
+  step "Forge host identity"
+  FORGE_IP=$(nix eval --json "path:${INVENTORY}#machines" --apply 'm: m.forge.ip' | jq -r .)
+  if grep -q "  forgeUrl = \"http://${FORGE_IP}\";" "${SECRETS}/identity.nix"; then
+    printf '  already keyed to %s\n' "$FORGE_IP"
+  else
+    # Whole-line seds on the template's fixed shape; forgeUrl may predate
+    # allod/secrets#44, so it is inserted rather than assumed present.
+    sed -i \
+      -e "s|^  forgeHost = \".*\";|  forgeHost = \"${FORGE_IP}\";|" \
+      -e "s|^  forgePort = [0-9]*;|  forgePort = 2222;|" \
+      "${SECRETS}/identity.nix"
+    if grep -q '^  forgeUrl = ' "${SECRETS}/identity.nix"; then
+      sed -i "s|^  forgeUrl = \".*\";|  forgeUrl = \"http://${FORGE_IP}\";|" "${SECRETS}/identity.nix"
+    else
+      sed -i "/^  forgePort = /a\\  forgeUrl = \"http://${FORGE_IP}\";" "${SECRETS}/identity.nix"
+    fi
+    grep -q "  forgeHost = \"${FORGE_IP}\";" "${SECRETS}/identity.nix" \
+      || die "could not set forgeHost in ${SECRETS}/identity.nix"
+    grep -q "  forgePort = 2222;" "${SECRETS}/identity.nix" \
+      || die "could not set forgePort in ${SECRETS}/identity.nix"
+    grep -q "  forgeUrl = \"http://${FORGE_IP}\";" "${SECRETS}/identity.nix" \
+      || die "could not set forgeUrl in ${SECRETS}/identity.nix"
+    git_commit "$SECRETS" "getting-started: forge identity points at the forge VM"
+    printf '  keyed to %s\n' "$FORGE_IP"
+  fi
+
+  step "Dev VM ${DEV_VM} pointed at its own forge"
+  if grep -q '^\( *\)forge_key = "allod_vm";' "${INVENTORY}/flake.nix" \
+    && ! grep -q 'host_provided_repos = \[ "allod/tools"' "${INVENTORY}/flake.nix"; then
+    printf '  already declared\n'
+  else
+    # forge_key = null; recurs on every other machine, so the flip is scoped
+    # to the ${DEV_VM} block, not matched bare.
+    sed -i \
+      -e "/^        ${DEV_VM} = {/,/^        };/{s|^\( *\)forge_key = null;|\1forge_key = \"allod_vm\";|}" \
+      -e '/host_provided_repos = \[ "allod\/tools"/d' \
+      "${INVENTORY}/flake.nix"
+    grep -q '^\( *\)forge_key = "allod_vm";' "${INVENTORY}/flake.nix" \
+      || die "could not restore forge_key in ${INVENTORY}/flake.nix"
+    grep -q 'host_provided_repos = \[ "allod/tools"' "${INVENTORY}/flake.nix" \
+      && die "host_provided_repos still declared in ${INVENTORY}/flake.nix"
+    nix eval --raw "path:${INVENTORY}#lib.vmSpecsJson" | jq -S . > "${INVENTORY}/scripts/vm-specs.json"
+    git_commit "$INVENTORY" "getting-started: ${DEV_VM} forge_key restored, host-provided repos dropped"
+    printf '  declared\n'
+  fi
 else
-  sed -i \
-    -e "s|^\( *\)forge_key = \"allod_vm\";|\1forge_key = null;|" \
-    -e "s|^\( *\)repos = \(\[ \"allod/tools\".*\];\)|\1repos = \2\n\1host_provided_repos = \2|" \
-    "${INVENTORY}/flake.nix"
-  grep -q 'host_provided_repos = \[ "allod/tools"' "${INVENTORY}/flake.nix" \
-    || die "could not declare host_provided_repos in ${INVENTORY}/flake.nix"
-  nix eval --raw "path:${INVENTORY}#lib.vmSpecsJson" | jq -S . > "${INVENTORY}/scripts/vm-specs.json"
-  git_commit "$INVENTORY" "getting-started: ${DEV_VM} is host-provided and forge-less"
-  printf '  declared\n'
+  step "Dev VM ${DEV_VM} built from the local clones, no forge key"
+  if grep -q 'host_provided_repos = \[ "allod/tools"' "${INVENTORY}/flake.nix"; then
+    printf '  already declared\n'
+  else
+    sed -i \
+      -e "s|^\( *\)forge_key = \"allod_vm\";|\1forge_key = null;|" \
+      -e "s|^\( *\)repos = \(\[ \"allod/tools\".*\];\)|\1repos = \2\n\1host_provided_repos = \2|" \
+      "${INVENTORY}/flake.nix"
+    grep -q 'host_provided_repos = \[ "allod/tools"' "${INVENTORY}/flake.nix" \
+      || die "could not declare host_provided_repos in ${INVENTORY}/flake.nix"
+    nix eval --raw "path:${INVENTORY}#lib.vmSpecsJson" | jq -S . > "${INVENTORY}/scripts/vm-specs.json"
+    git_commit "$INVENTORY" "getting-started: ${DEV_VM} is host-provided and forge-less"
+    printf '  declared\n'
+  fi
 fi
 
 # --- 4. deploy inputs --------------------------------------------------------
@@ -217,13 +315,21 @@ done
 if [[ -n "$(git -C "$DEPLOY" status --porcelain)" ]]; then
   git_commit "$DEPLOY" "getting-started: data inputs at the local clones"
 fi
-(cd "$DEPLOY" && nix flake update "${DATA_INPUTS[@]}")
-if [[ -n "$(git -C "$DEPLOY" status --porcelain)" ]]; then
-  git_commit "$DEPLOY" "getting-started: lock the local clones"
-fi
+relock_data_inputs
 printf '  evaluating the hypervisor configuration...\n'
 TOPLEVEL=$(cd "$DEPLOY" && nix eval --raw ".#nixosConfigurations.${HYPERVISOR}.config.system.build.toplevel.drvPath")
 printf '  %s\n' "$TOPLEVEL"
+
+if $FORGE; then
+  cat <<EOF
+
+Done. Next: provision-vm --replace allod-dev
+It replaces ${DEV_VM} instead of rebuilding it in place: the guest clone step
+pulls from an existing checkout, and the host-provided one on ${DEV_VM} right
+now has no remote to pull from.
+EOF
+  exit 0
+fi
 
 if $PREPARE_ONLY; then
   printf '\n--prepare-only: stopping before the builds.\n'

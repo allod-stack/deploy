@@ -31,6 +31,18 @@ boot. The header of the script lists each step. Then reboot, log in as the
 same user, and `provision-vm allod-dev`. Firmware must be UEFI with Secure
 Boot off; the stock installer already required that.
 
+### Giving the dev VM its own forge
+
+Once there is a forge VM, `bash getting-started.sh --forge` points the dev
+VM at it instead of leaving it forge-less: provision the `forge` machine, run
+`forge-sync forge` on the host, commit what it prints, then run the script
+again with `--forge`. It refuses, naming `forge-sync forge`, if that has not
+happened yet. It moves the forge host identity onto the forge VM's own
+address, gives the dev VM its forge key back, re-locks the three data inputs,
+and names `provision-vm --replace allod-dev` as the next step — it replaces
+the VM rather than rebuilding it, because the dev VM's clones were pulled
+from the host and have no remote. Rerunnable, like the first run.
+
 ## Build
 
 ```
