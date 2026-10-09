@@ -338,7 +338,9 @@ printf '  %s\n' "$TOPLEVEL"
 if $FORGE; then
   cat <<EOF
 
-Done. Next: provision-vm --replace allod-dev
+Done. Your forge is at http://${FORGE_IP} (log in as the account forge-sync created).
+
+Next: provision-vm --replace allod-dev
 It replaces ${DEV_VM} instead of rebuilding it in place: the guest clone step
 pulls from an existing checkout, and the host-provided one on ${DEV_VM} right
 now has no remote to pull from.
