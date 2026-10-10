@@ -35,7 +35,9 @@
 #   d. re-locks the three data inputs the same way step 4 does
 #   e. guards allod-dev for work not yet received to the host (stops here
 #      under --prepare-only), then runs `provision-vm --replace allod-dev`
-# and ends by printing the forge login and `ssh allod-dev`.
+# and ends by printing the forge login and `ssh allod-dev`. Safe to rerun:
+# once allod-dev already clones from the forge, the guard and the replace
+# are both skipped and nothing is wiped.
 #
 # The account that runs this stays the operator account: NixOS keeps mutable
 # users, so its uid, password and home survive the switch. Only step 6 needs
@@ -161,15 +163,19 @@ run_forge_sync() {
   FORGE_SYNC_RAN=true
 }
 
-# Checks every repo under the dev VM's ~/work for a dirty tree or commits the
-# host clone at the same path under ~/work does not have yet. Exit status:
-# 0 clean, 1 something to receive, 2 the VM did not answer SSH.
+# Checks, over one ssh round trip, whether allod-dev already clones from the
+# forge (its tools repo's origin is the forge VM), and if not, whether every
+# repo under its ~/work is clean and received by the host. Exit status:
+# 0 clean, needs the replace; 1 something to receive; 2 unreachable over ssh;
+# 3 already forge-backed, so the guard and the replace are both skipped.
 guard_dev_vm() {
   local ssh_opts=(-o BatchMode=yes -o StrictHostKeyChecking=yes
     -o "UserKnownHostsFile=${HOME}/.ssh/known_hosts_vms")
   # Single-quoted: these $vars are the *remote* shell's, expanded on the VM.
   # shellcheck disable=SC2016
   local remote_script='
+    remote=$(git -C "$HOME/work/allod/tools" remote get-url origin 2>/dev/null) || remote=""
+    printf "FORGE_REMOTE %s\n" "$remote"
     cd "$HOME/work" 2>/dev/null || exit 0
     find . -mindepth 2 -maxdepth 3 -name .git -type d 2>/dev/null |
     while IFS= read -r gitdir; do
@@ -185,6 +191,15 @@ guard_dev_vm() {
     printf 'Run by hand: provision-vm --replace %s\n' "$DEV_VM"
     return 2
   fi
+
+  local first_line="${out%%$'\n'*}" rest="" forge_remote=""
+  if [[ "$out" == *$'\n'* ]]; then rest="${out#*$'\n'}"; fi
+  read -r _ forge_remote <<< "$first_line"
+  if [[ -n "$forge_remote" && "$forge_remote" == "ssh://git@${FORGE_IP}:2222/"* ]]; then
+    printf '%s already clones from the forge\n' "$DEV_VM"
+    return 3
+  fi
+
   local found=false repo head state host_clone
   while read -r repo head state; do
     [[ -n "$repo" ]] || continue
@@ -203,7 +218,7 @@ guard_dev_vm() {
       printf '  %s: not received to the host\n' "$repo"
       printf '  allod patch receive %s:%s %s\n' "$DEV_VM" "$repo" "$repo"
     fi
-  done <<< "$out"
+  done <<< "$rest"
   $found && return 1
   return 0
 }
@@ -445,13 +460,15 @@ if $FORGE; then
   guard_dev_vm || guard_status=$?
   if [[ "$guard_status" -eq 2 ]]; then
     exit 0
-  elif [[ "$guard_status" -ne 0 ]]; then
+  elif [[ "$guard_status" -eq 1 ]]; then
     printf 'The replace was not run.\n'
     exit 1
+  elif [[ "$guard_status" -eq 0 ]]; then
+    step "Replacing ${DEV_VM}"
+    provision-vm --replace "$DEV_VM"
   fi
-
-  step "Replacing ${DEV_VM}"
-  provision-vm --replace "$DEV_VM"
+  # guard_status 3 (already forge-backed): guard and replace both skipped,
+  # the final block below still prints.
 
   if $FORGE_SYNC_RAN; then
     password_line=""

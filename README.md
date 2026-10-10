@@ -47,8 +47,11 @@ own address, gives the dev VM its forge key back, re-locks the three data
 inputs, checks the dev VM for work not yet received to the host, and
 replaces it with `provision-vm --replace allod-dev` — the VM is replaced
 rather than rebuilt in place, because its clones were pulled from the host
-and have no remote. It ends by printing the forge login. Rerunnable, like the
-first run.
+and have no remote. It ends by printing the forge login.
+
+Safe to rerun: once allod-dev already clones from the forge, the run checks
+for that first and replaces nothing — the guard and the replace both skip,
+and only the login is printed again.
 
 Because the replace discards the VM, anything done in the forge-less VM must
 come back to the host first: `allod patch receive allod-dev:<repo> <repo>`
