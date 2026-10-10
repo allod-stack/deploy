@@ -33,15 +33,28 @@ Boot off; the stock installer already required that.
 
 ### Giving the dev VM its own forge
 
-Once there is a forge VM, `bash getting-started.sh --forge` points the dev
-VM at it instead of leaving it forge-less: provision the `forge` machine, run
-`forge-sync forge` on the host, commit what it prints, then run the script
-again with `--forge`. It refuses, naming `forge-sync forge`, if that has not
-happened yet. It moves the forge host identity onto the forge VM's own
-address, gives the dev VM its forge key back, re-locks the three data inputs,
-and names `provision-vm --replace allod-dev` as the next step — it replaces
-the VM rather than rebuilding it, because the dev VM's clones were pulled
-from the host and have no remote. Rerunnable, like the first run.
+Three commands turn a forge-less dev VM into one with its own forge:
+
+```
+provision-vm forge
+bash ~/work/allod/deploy/getting-started.sh --forge
+ssh allod-dev
+```
+
+The second command runs `forge-sync forge` itself (prompting if it needs to)
+and commits what it wrote, moves the forge host identity onto the forge VM's
+own address, gives the dev VM its forge key back, re-locks the three data
+inputs, checks the dev VM for work not yet received to the host, and
+replaces it with `provision-vm --replace allod-dev` — the VM is replaced
+rather than rebuilt in place, because its clones were pulled from the host
+and have no remote. It ends by printing the forge login. Rerunnable, like the
+first run.
+
+Because the replace discards the VM, anything done in the forge-less VM must
+come back to the host first: `allod patch receive allod-dev:<repo> <repo>`
+for every repo with work not yet on the host. The `--forge` run checks this
+itself and refuses to replace the VM until it is done, printing the exact
+command for each repo that still needs it.
 
 ## Build
 

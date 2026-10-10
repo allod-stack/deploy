@@ -26,11 +26,16 @@
 #   6. builds the hypervisor configuration and makes it the next boot
 #
 # A second run, `bash getting-started.sh --forge` (combinable with
-# --prepare-only; see the README for the precondition):
-#   a. moves identity.nix's forgeHost/forgePort/forgeUrl to the forge VM
-#   b. restores allod-dev's forge_key and drops host_provided_repos
-#   c. re-locks the three data inputs the same way step 4 does
-# then names `provision-vm --replace allod-dev` as the next step and stops.
+# --prepare-only; see the README):
+#   a. if the secrets clone is not yet keyed to a forge VM, runs
+#      `forge-sync --report ... forge` (fails naming `forge-sync forge`
+#      under --prepare-only) and commits what it wrote
+#   b. moves identity.nix's forgeHost/forgePort/forgeUrl to the forge VM
+#   c. restores allod-dev's forge_key and drops host_provided_repos
+#   d. re-locks the three data inputs the same way step 4 does
+#   e. guards allod-dev for work not yet received to the host (stops here
+#      under --prepare-only), then runs `provision-vm --replace allod-dev`
+# and ends by printing the forge login and `ssh allod-dev`.
 #
 # The account that runs this stays the operator account: NixOS keeps mutable
 # users, so its uid, password and home survive the switch. Only step 6 needs
@@ -48,9 +53,17 @@ HARDWARE_CONFIG="${ALLOD_HARDWARE_CONFIG:-/etc/nixos/hardware-configuration.nix}
 HOST_KEY="${HOME}/.ssh/host"
 HYPERVISOR=nexus
 DEV_VM=allod-dev
+FORGE_VM=forge
 # All of them: the dev VM lists every one, and the host pushes its own clones.
 REPOS=(deploy inventory secrets profiles archetypes nexus vm tools strategy memory)
 DATA_INPUTS=(profiles secrets inventory)
+
+# Filled in by run_forge_sync when it runs; left empty when the secrets clone
+# was already keyed, in which case the final block says so generically.
+FORGE_SYNC_RAN=false
+FORGE_LOGIN_URL=""
+HUMAN_USER=""
+HUMAN_PASSWORD=""
 
 export NIX_CONFIG="experimental-features = nix-command flakes"
 
@@ -124,6 +137,77 @@ Refs allod/deploy#9"
   fi
 }
 
+# Runs forge-sync with the terminal attached, so it can prompt, and reads
+# its --report file into FORGE_LOGIN_URL/HUMAN_USER/HUMAN_PASSWORD. The report
+# directory lives under a tmpfs mktemp -d and is gone before this returns.
+run_forge_sync() {
+  local report_dir report
+  report_dir=$(mktemp -d -p "${XDG_RUNTIME_DIR:-/dev/shm}")
+  chmod 700 "$report_dir"
+  report="${report_dir}/report"
+  if ! forge-sync --report "$report" "$FORGE_VM"; then
+    rm -rf "$report_dir"
+    exit 1
+  fi
+  local k v
+  while IFS='=' read -r k v; do
+    case "$k" in
+      forge_url) FORGE_LOGIN_URL="$v" ;;
+      human_user) HUMAN_USER="$v" ;;
+      human_password) HUMAN_PASSWORD="$v" ;;
+    esac
+  done < "$report"
+  rm -rf "$report_dir"
+  FORGE_SYNC_RAN=true
+}
+
+# Checks every repo under the dev VM's ~/work for a dirty tree or commits the
+# host clone at the same path under ~/work does not have yet. Exit status:
+# 0 clean, 1 something to receive, 2 the VM did not answer SSH.
+guard_dev_vm() {
+  local ssh_opts=(-o BatchMode=yes -o StrictHostKeyChecking=yes
+    -o "UserKnownHostsFile=${HOME}/.ssh/known_hosts_vms")
+  # Single-quoted: these $vars are the *remote* shell's, expanded on the VM.
+  # shellcheck disable=SC2016
+  local remote_script='
+    cd "$HOME/work" 2>/dev/null || exit 0
+    find . -mindepth 2 -maxdepth 3 -name .git -type d 2>/dev/null |
+    while IFS= read -r gitdir; do
+      repo=${gitdir%/.git}; repo=${repo#./}
+      head=$(git -C "$repo" rev-parse HEAD 2>/dev/null) || continue
+      if [ -n "$(git -C "$repo" status --porcelain)" ]; then state=dirty; else state=clean; fi
+      printf "%s %s %s\n" "$repo" "$head" "$state"
+    done'
+  local out
+  # shellcheck disable=SC2029 # remote_script is meant to run on the VM as-is
+  if ! out=$(ssh "${ssh_opts[@]}" "$DEV_VM" "$remote_script" 2>&1); then
+    printf 'Replace skipped: %s is unreachable over ssh.\n' "$DEV_VM"
+    printf 'Run by hand: provision-vm --replace %s\n' "$DEV_VM"
+    return 2
+  fi
+  local found=false repo head state host_clone
+  while read -r repo head state; do
+    [[ -n "$repo" ]] || continue
+    # Mirrors the host's own ~/work/<repo> layout, nested or not: the fleet
+    # keeps the same relative path under ~/work on every machine.
+    host_clone="${HOME}/work/${repo}"
+    local bad=false
+    [[ "$state" == dirty ]] && bad=true
+    if [[ -d "${host_clone}/.git" ]]; then
+      git -C "$host_clone" cat-file -e "$head" 2>/dev/null || bad=true
+    else
+      bad=true
+    fi
+    if $bad; then
+      found=true
+      printf '  %s: not received to the host\n' "$repo"
+      printf '  allod patch receive %s:%s %s\n' "$DEV_VM" "$repo" "$repo"
+    fi
+  done <<< "$out"
+  $found && return 1
+  return 0
+}
+
 # Regenerates scripts/vm-specs.json from the current inventory and commits it
 # under $1 if it changed, so a run that died between an inventory sed and
 # this call is repaired by the next run reaching it.
@@ -159,10 +243,22 @@ SECRETS="${WORK}/secrets"
 DEPLOY="${WORK}/deploy"
 
 if $FORGE; then
-  [[ -f "${SECRETS}/secrets/allod-dev-forge-key.age" && -f "${SECRETS}/secrets/agent-pr-token.age" ]] \
+  keyed=false
+  if [[ -f "${SECRETS}/secrets/allod-dev-forge-key.age" && -f "${SECRETS}/secrets/agent-pr-token.age" ]] \
     && jq -e '.allod_vm' "${SECRETS}/forge-ssh-keys.json" >/dev/null 2>&1 \
-    && grep -q '^      forgeAccess = true;' "${SECRETS}/identity.nix" \
-    || die "run 'forge-sync forge' first: ${SECRETS} is not yet keyed to a forge VM"
+    && grep -q '^      forgeAccess = true;' "${SECRETS}/identity.nix"; then
+    keyed=true
+  fi
+  if ! $keyed; then
+    if $PREPARE_ONLY; then
+      die "run 'forge-sync forge' first: ${SECRETS} is not yet keyed to a forge VM"
+    fi
+    step "forge-sync ${FORGE_VM}"
+    run_forge_sync
+    if [[ -n "$(git -C "$SECRETS" status --porcelain)" ]]; then
+      git_commit "$SECRETS" "forge-sync: reconcile forge"
+    fi
+  fi
 fi
 
 # --- 2. hardware -------------------------------------------------------------
@@ -265,6 +361,9 @@ fi
 if $FORGE; then
   step "Forge host identity"
   FORGE_IP=$(nix eval --json "path:${INVENTORY}#machines" --apply 'm: m.forge.ip' | jq -r .)
+  # The secrets clone was already keyed, so run_forge_sync never ran and
+  # never learned the URL from its report; derive it the same way.
+  $FORGE_SYNC_RAN || FORGE_LOGIN_URL="http://${FORGE_IP}"
   if grep -q "  forgeHost = \"${FORGE_IP}\";" "${SECRETS}/identity.nix" \
     && grep -q "  forgePort = 2222;" "${SECRETS}/identity.nix" \
     && grep -q "  forgeUrl = \"http://${FORGE_IP}\";" "${SECRETS}/identity.nix"; then
@@ -336,15 +435,44 @@ TOPLEVEL=$(cd "$DEPLOY" && nix eval --raw ".#nixosConfigurations.${HYPERVISOR}.c
 printf '  %s\n' "$TOPLEVEL"
 
 if $FORGE; then
-  cat <<EOF
+  if $PREPARE_ONLY; then
+    printf '\n--prepare-only: stopping before the builds.\n'
+    exit 0
+  fi
 
-Done. Your forge is at http://${FORGE_IP} (log in as the account forge-sync created).
+  step "Guarding ${DEV_VM} before the replace"
+  guard_status=0
+  guard_dev_vm || guard_status=$?
+  if [[ "$guard_status" -eq 2 ]]; then
+    exit 0
+  elif [[ "$guard_status" -ne 0 ]]; then
+    printf 'The replace was not run.\n'
+    exit 1
+  fi
 
-Next: provision-vm --replace allod-dev
-It replaces ${DEV_VM} instead of rebuilding it in place: the guest clone step
-pulls from an existing checkout, and the host-provided one on ${DEV_VM} right
-now has no remote to pull from.
+  step "Replacing ${DEV_VM}"
+  provision-vm --replace "$DEV_VM"
+
+  if $FORGE_SYNC_RAN; then
+    password_line=""
+    if [[ -n "$HUMAN_PASSWORD" ]]; then
+      password_line=$'\n'"${HUMAN_PASSWORD} — change it on first login."
+    fi
+    cat <<EOF
+
+Done.
+${FORGE_LOGIN_URL}
+${HUMAN_USER}${password_line}
+Next: ssh ${DEV_VM}
 EOF
+  else
+    cat <<EOF
+
+Done.
+Log in at ${FORGE_LOGIN_URL} as the account forge-sync created.
+Next: ssh ${DEV_VM}
+EOF
+  fi
   exit 0
 fi
 
