@@ -82,11 +82,11 @@
         "vm": "vm"
       },
       "locked": {
-        "lastModified": 1791675123,
-        "narHash": "sha256-hAq4AjX4nEmvFb4fAo04pqrmnf2u0kq3FC9u7v1HaJ0=",
+        "lastModified": 1791675168,
+        "narHash": "sha256-LV8QO1k03TDWu/UARXU6XQE42T5fk61wEwX7faOzh/s=",
         "ref": "refs/heads/master",
-        "rev": "8022af9e8086a599fae0332569d470605493c0fd",
-        "revCount": 311,
+        "rev": "9e570baf55d6aed4c26b77e6972a7ca1451f2f9f",
+        "revCount": 312,
         "type": "git",
         "url": "https://forge.anarch.diy/allod/archetypes.git"
       },
