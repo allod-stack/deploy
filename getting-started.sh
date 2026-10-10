@@ -25,19 +25,10 @@
 #   5. builds the installer image the VMs boot from, into ~/iso/
 #   6. builds the hypervisor configuration and makes it the next boot
 #
-# A second run, `bash getting-started.sh --forge` (combinable with
-# --prepare-only; see the README):
-#   a. if the secrets clone is not yet keyed to a forge VM, runs
-#      `forge-sync --report ... forge` (fails naming `forge-sync forge`
-#      under --prepare-only) and commits what it wrote
-#   b. moves identity.nix's forgeHost/forgePort/forgeUrl to the forge VM
-#   c. restores allod-dev's forge_key and drops host_provided_repos
-#   d. re-locks the three data inputs the same way step 4 does
-#   e. guards allod-dev for work not yet received to the host (stops here
-#      under --prepare-only), then runs `provision-vm --replace allod-dev`
-# and ends by printing the forge login and `ssh allod-dev`. Safe to rerun:
-# once allod-dev already clones from the forge, the guard and the replace
-# are both skipped and nothing is wiped.
+# A second run, `bash getting-started.sh --forge`, keys the dev VM to a forge
+# VM and replaces it (see the README for the steps); --prepare-only stops
+# before the guard. Rerunning is safe once allod-dev already clones from the
+# forge: the guard and the replace both skip, and nothing is wiped.
 #
 # The account that runs this stays the operator account: NixOS keeps mutable
 # users, so its uid, password and home survive the switch. Only step 6 needs
@@ -60,8 +51,8 @@ FORGE_VM=forge
 REPOS=(deploy inventory secrets profiles archetypes nexus vm tools strategy memory)
 DATA_INPUTS=(profiles secrets inventory)
 
-# Filled in by run_forge_sync when it runs; left empty when the secrets clone
-# was already keyed, in which case the final block says so generically.
+# Set by run_forge_sync; stay empty when the secrets clone was already
+# keyed, so the final block names the account generically instead.
 FORGE_SYNC_RAN=false
 FORGE_LOGIN_URL=""
 HUMAN_USER=""
@@ -140,26 +131,41 @@ Refs allod/deploy#9"
 }
 
 # Runs forge-sync with the terminal attached, so it can prompt, and reads
-# its --report file into FORGE_LOGIN_URL/HUMAN_USER/HUMAN_PASSWORD. The report
-# directory lives under a tmpfs mktemp -d and is gone before this returns.
+# its --report file into FORGE_LOGIN_URL/HUMAN_USER/HUMAN_PASSWORD. The trap
+# removes the report directory on any exit from here on, including die.
 run_forge_sync() {
   local report_dir report
   report_dir=$(mktemp -d -p "${XDG_RUNTIME_DIR:-/dev/shm}")
+  trap 'rm -rf "$report_dir"' EXIT
   chmod 700 "$report_dir"
   report="${report_dir}/report"
-  if ! forge-sync --report "$report" "$FORGE_VM"; then
-    rm -rf "$report_dir"
-    exit 1
-  fi
-  local k v
+  forge-sync --report "$report" "$FORGE_VM" || exit 1
+  [[ -f "$report" ]] || die "forge-sync --report did not write ${report}"
+
+  local k v url_seen=false user_seen=false pass_seen=false xtrace_was_on=false
+  case "$-" in *x*) xtrace_was_on=true ;; esac
+  set +x
   while IFS='=' read -r k v; do
     case "$k" in
-      forge_url) FORGE_LOGIN_URL="$v" ;;
-      human_user) HUMAN_USER="$v" ;;
-      human_password) HUMAN_PASSWORD="$v" ;;
+      forge_url) FORGE_LOGIN_URL="$v"; url_seen=true ;;
+      human_user) HUMAN_USER="$v"; user_seen=true ;;
+      human_password) HUMAN_PASSWORD="$v"; pass_seen=true ;;
     esac
   done < "$report"
+  $xtrace_was_on && set -x
+
+  if ! $url_seen || [[ -z "$FORGE_LOGIN_URL" ]]; then
+    die "forge-sync --report is missing a non-empty forge_url"
+  fi
+  if ! $user_seen || [[ -z "$HUMAN_USER" ]]; then
+    die "forge-sync --report is missing a non-empty human_user"
+  fi
+  if ! $pass_seen; then
+    die "forge-sync --report is missing human_password"
+  fi
+
   rm -rf "$report_dir"
+  trap - EXIT
   FORGE_SYNC_RAN=true
 }
 
@@ -180,16 +186,26 @@ guard_dev_vm() {
     find . -mindepth 2 -maxdepth 3 -name .git -type d 2>/dev/null |
     while IFS= read -r gitdir; do
       repo=${gitdir%/.git}; repo=${repo#./}
-      head=$(git -C "$repo" rev-parse HEAD 2>/dev/null) || continue
+      # An unborn branch (no commits yet) is still reported, head "-", so
+      # dirty work on it is not silently invisible to the guard.
+      head=$(git -C "$repo" rev-parse HEAD 2>/dev/null) || head="-"
       if [ -n "$(git -C "$repo" status --porcelain)" ]; then state=dirty; else state=clean; fi
       printf "%s %s %s\n" "$repo" "$head" "$state"
     done'
-  local out
+  local out rc
   # shellcheck disable=SC2029 # remote_script is meant to run on the VM as-is
-  if ! out=$(ssh "${ssh_opts[@]}" "$DEV_VM" "$remote_script" 2>&1); then
+  if out=$(ssh "${ssh_opts[@]}" "$DEV_VM" "$remote_script" 2>&1); then
+    rc=0
+  else
+    rc=$?
+  fi
+  if [[ "$rc" -eq 255 ]]; then
     printf 'Replace skipped: %s is unreachable over ssh.\n' "$DEV_VM"
     printf 'Run by hand: provision-vm --replace %s\n' "$DEV_VM"
     return 2
+  elif [[ "$rc" -ne 0 ]]; then
+    die "ssh to ${DEV_VM} failed (exit ${rc}):
+${out}"
   fi
 
   local first_line="${out%%$'\n'*}" rest="" forge_remote=""
@@ -208,10 +224,14 @@ guard_dev_vm() {
     host_clone="${HOME}/work/${repo}"
     local bad=false
     [[ "$state" == dirty ]] && bad=true
-    if [[ -d "${host_clone}/.git" ]]; then
-      git -C "$host_clone" cat-file -e "$head" 2>/dev/null || bad=true
-    else
-      bad=true
+    # head "-" is unborn: there is no sha to check for, so whether it is
+    # "not received" comes from the dirty flag alone, set just above.
+    if [[ "$head" != "-" ]]; then
+      if [[ -d "${host_clone}/.git" ]]; then
+        git -C "$host_clone" cat-file -e "$head" 2>/dev/null || bad=true
+      else
+        bad=true
+      fi
     fi
     if $bad; then
       found=true
@@ -458,17 +478,15 @@ if $FORGE; then
   step "Guarding ${DEV_VM} before the replace"
   guard_status=0
   guard_dev_vm || guard_status=$?
-  if [[ "$guard_status" -eq 2 ]]; then
-    exit 0
-  elif [[ "$guard_status" -eq 1 ]]; then
+  if [[ "$guard_status" -eq 1 ]]; then
     printf 'The replace was not run.\n'
     exit 1
   elif [[ "$guard_status" -eq 0 ]]; then
     step "Replacing ${DEV_VM}"
     provision-vm --replace "$DEV_VM"
   fi
-  # guard_status 3 (already forge-backed): guard and replace both skipped,
-  # the final block below still prints.
+  # Status 2 (unreachable) and 3 (forge-backed) both skip the replace and
+  # fall through to the final block below.
 
   if $FORGE_SYNC_RAN; then
     password_line=""
