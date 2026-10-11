@@ -31,6 +31,69 @@ boot. The header of the script lists each step. Then reboot, log in as the
 same user, and `provision-vm allod-dev`. Firmware must be UEFI with Secure
 Boot off; the stock installer already required that.
 
+### Giving the agent a model
+
+Inside the VM, once:
+
+```
+pi-key
+```
+
+It asks for a provider and lists the endpoint's models. nullsink
+(https://nullsink.is) is pay per use with no account: buy a key with a few
+dollars of credit first, pick it, paste the key at the hidden prompt. `pi-key`
+checks the key against the endpoint and ends with `Run: pi`; then `pi` talks
+to the model and `allod skill` lists what the agent knows how to do. A Claude
+or ChatGPT subscription works too: run `claude` or `codex` in the VM, open the
+URL it prints in the host's browser, and paste the code back.
+
+To hand the key over from the host instead of typing it into the VM, save it
+as a file there and pipe it in:
+
+```
+ssh allod-dev pi-key nullsink < ~/nullsink-key
+```
+
+It picks the first model the endpoint lists; add `--model <id>` to choose.
+Either way the VM now holds a key file, `~/.pi/keys/nullsink`, and loses it
+when the VM is replaced.
+
+The durable way is the managed path: the key is pasted once on the host,
+encrypted to the host's key and the VM's, and the VM uses it without ever
+holding it. Rotation is then one command. On the host, once, so git knows
+who you are:
+
+```
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+```
+
+Then, still on the host (the prompt says `nexus`, not `allod-dev`):
+
+```
+mkdir -p ~/work/allod/secrets/secrets/pi-credentials
+U=https://nullsink.is/v1
+M=glm-5-3-flash
+pi-provider add nullsink --credential nullsink --url $U --target allod-dev --model $M
+git -C ~/work/allod/profiles commit -am "pi-providers: add nullsink"
+git -C ~/work/allod/secrets add -A
+git -C ~/work/allod/secrets commit -m "add nullsink token"
+cd ~/work/allod/deploy
+nix flake update --refresh profiles secrets
+jq -r '.nodes.profiles.locked.rev, .nodes.secrets.locked.rev' flake.lock
+git commit -am "lock: nullsink"
+rebuild-vm allod-dev
+```
+
+The `pi-provider` line asks for the key, hidden. The `mkdir` is needed only
+on a deployment that has never held a Pi credential (allod/nexus#80). Stop if
+the `jq` line prints the same two revisions as before: the re-lock silently
+did nothing, which happens when either clone had uncommitted changes. Then
+inside the VM, `pi auth check --provider nullsink` says `ready`, `pi` answers,
+and `~/.pi/keys` is empty. To rotate the key later, run
+`pi-provider token rotate nullsink default` on the host and repeat the two
+commits, the re-lock and the rebuild.
+
 ### Giving the dev VM its own forge
 
 Three commands turn a forge-less dev VM into one with its own forge:
@@ -58,6 +121,24 @@ come back to the host first: `allod patch receive allod-dev:<repo> <repo>`
 for every repo with work not yet on the host. The `--forge` run checks this
 itself and refuses to replace the VM until it is done, printing the exact
 command for each repo that still needs it.
+
+### If it goes wrong
+
+- Check the prompt first. Host commands run where it says `nexus`; VM
+  commands where it says `allod-dev`. Most wrong turns are the right command
+  on the wrong machine.
+- Inside the VM, start `claude` (log in through the host's browser) and tell
+  it the symptom. It can read the VM's journal and files itself and will hand
+  you any host-side line to type.
+- The script stops at the first failure and says which step. Rerunning it is
+  safe; finished steps are skipped.
+- After the reboot, if your login does not work, log in as `root` with the
+  administrator password from the install and run `passwd <your user>`.
+- `provision-vm` can fail on a slow download with `unexpected end-of-file`;
+  run it again.
+- Virtual Machine Manager opens empty: launch it as
+  `virt-manager -c qemu:///system`, or add the QEMU/KVM system connection
+  under File, Add Connection.
 
 ## Build
 
