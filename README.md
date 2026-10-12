@@ -22,6 +22,22 @@ curl -O https://forge.anarch.diy/allod/deploy/raw/branch/master/getting-started.
 bash getting-started.sh
 ```
 
+The forge is the source of truth; GitHub mirrors it at
+[github.com/allod-stack](https://github.com/allod-stack), which also serves
+the script:
+
+```
+curl -O https://raw.githubusercontent.com/allod-stack/deploy/master/getting-started.sh
+ALLOD_SOURCE=github bash getting-started.sh
+```
+
+`ALLOD_SOURCE` picks where the public repos come from, clones and flake inputs
+alike: `forge` (default), `github`, or an absolute directory of bare mirrors
+(`<dir>/<repo>.git`, made with `git clone --mirror`) for a machine with no
+network to either. It is one git `insteadOf` rule in `~/.gitconfig`; the flake
+lock keeps its forge URLs and nothing relocks. Rerun with `ALLOD_SOURCE=forge`
+to route back.
+
 It clones the public repos under `~/work/allod/`, uses this machine's own
 `/etc/nixos/hardware-configuration.nix` as the hypervisor hardware, generates
 the host identity and fresh VM host keys, takes the dev VM out of forge access

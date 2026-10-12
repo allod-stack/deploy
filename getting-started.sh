@@ -12,7 +12,8 @@
 # `provision-vm allod-dev`.
 #
 # What it does, in order; every step is skipped when its result exists:
-#   1. clones the public allod repos under ~/work/allod/, the layout the host
+#   1. routes fetches of the public repos (forge, GitHub mirror, or local bare
+#      mirrors via ALLOD_SOURCE) and clones them under ~/work/allod/, the layout the host
 #      scripts resolve through the inventory's repository registry
 #   2. copies this machine's /etc/nixos/hardware-configuration.nix over the
 #      inventory's hypervisor hardware module
@@ -30,6 +31,11 @@
 # before the guard. Rerunning is safe once allod-dev already clones from the
 # forge: the guard and the replace both skip, and nothing is wiped.
 #
+# ALLOD_SOURCE=github fetches the public repos, clones and flake inputs alike,
+# from the GitHub mirror instead of the forge; ALLOD_SOURCE=/path/to/dir uses
+# bare mirrors <dir>/<repo>.git on local disk, no network at all for them.
+# Rerun with ALLOD_SOURCE=forge to route back. Step 1 explains the mechanism.
+#
 # The account that runs this stays the operator account: NixOS keeps mutable
 # users, so its uid, password and home survive the switch. Only step 6 needs
 # sudo, for the bootloader entry. Nothing here partitions, formats or
@@ -41,6 +47,8 @@
 set -euo pipefail
 
 FORGE_URL="${ALLOD_FORGE_URL:-https://forge.anarch.diy}"
+# forge (default), github, or an absolute directory of bare mirrors; see step 1.
+ALLOD_SOURCE="${ALLOD_SOURCE:-forge}"
 WORK="${HOME}/work/allod"
 HARDWARE_CONFIG="${ALLOD_HARDWARE_CONFIG:-/etc/nixos/hardware-configuration.nix}"
 HOST_KEY="${HOME}/.ssh/host"
@@ -260,7 +268,38 @@ regenerate_vm_specs() {
   fi
 }
 
-# --- 1. clone ----------------------------------------------------------------
+# --- 1. source route and clone -----------------------------------------------
+
+# One git rule routes every fetch of the public repos: the clones below and
+# every forge-locked flake input nix fetches later, since nix runs git for
+# `git+https` inputs. The lock keeps its forge URLs; only the route moves, so
+# nothing relocks, and `forge` restores the default. The rule lands in
+# ~/.gitconfig by name: on a home-manager machine the XDG git config is a
+# store symlink and `--global` would try to write it. pushInsteadOf pins
+# pushes to the forge whatever the fetch route.
+FORGE_PREFIX="${FORGE_URL}/allod/"
+GITCONFIG="${HOME}/.gitconfig"
+step "Source route: ${ALLOD_SOURCE}"
+case "$ALLOD_SOURCE" in
+  forge)  SOURCE_PREFIX="" ;;
+  github) SOURCE_PREFIX="https://github.com/allod-stack/" ;;
+  /*)     [[ -d "${ALLOD_SOURCE}/deploy.git" ]] \
+            || die "${ALLOD_SOURCE} holds no deploy.git; expected bare mirrors <dir>/<repo>.git"
+          SOURCE_PREFIX="file://${ALLOD_SOURCE%/}/" ;;
+  *)      die "ALLOD_SOURCE must be forge, github, or an absolute directory of bare mirrors" ;;
+esac
+touch "$GITCONFIG"
+while read -r key value; do
+  [[ "$value" == "$FORGE_PREFIX" ]] && git config --file "$GITCONFIG" --unset "$key"
+done < <(git config --file "$GITCONFIG" --get-regexp '^url\..*\.insteadof$' || true)
+git config --file "$GITCONFIG" --unset "url.${FORGE_PREFIX}.pushInsteadOf" 2>/dev/null || true
+if [[ -n "$SOURCE_PREFIX" ]]; then
+  git config --file "$GITCONFIG" "url.${SOURCE_PREFIX}.insteadOf" "$FORGE_PREFIX"
+  git config --file "$GITCONFIG" "url.${FORGE_PREFIX}.pushInsteadOf" "$FORGE_PREFIX"
+  printf '  fetches of %s* go to %s*\n' "$FORGE_PREFIX" "$SOURCE_PREFIX"
+else
+  printf '  fetches go to the forge\n'
+fi
 
 step "Public repos under ${WORK}"
 mkdir -p "$WORK"
