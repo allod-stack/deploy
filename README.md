@@ -32,9 +32,11 @@ ALLOD_SOURCE=github bash getting-started.sh
 ```
 
 `ALLOD_SOURCE` picks where the public repos come from, clones and flake inputs
-alike: `forge` (default), `github`, or an absolute directory of bare mirrors
-(`<dir>/<repo>.git`, made with `git clone --mirror`) for a machine with no
-network to either. It is one git `insteadOf` rule in `~/.gitconfig`; the flake
+alike: `forge` (default), `github`, or an absolute directory holding the repos
+on local disk, as checkouts (`<dir>/<repo>`, a copy of `~/work/allod`) or bare
+mirrors (`<dir>/<repo>.git`), for a machine with no network to either. A
+checkout is read at its current `HEAD`, so a dirty or branched copy is what
+gets built. It is one git `insteadOf` rule in `~/.gitconfig`; the flake
 lock keeps its forge URLs and nothing relocks. Rerun with `ALLOD_SOURCE=forge`
 to route back.
 

@@ -32,8 +32,9 @@
 # forge: the guard and the replace both skip, and nothing is wiped.
 #
 # ALLOD_SOURCE=github fetches the public repos, clones and flake inputs alike,
-# from the GitHub mirror instead of the forge; ALLOD_SOURCE=/path/to/dir uses
-# bare mirrors <dir>/<repo>.git on local disk, no network at all for them.
+# from the GitHub mirror instead of the forge; ALLOD_SOURCE=/path/to/dir reads
+# them from local disk, either checkouts <dir>/<repo> or bare mirrors
+# <dir>/<repo>.git, with no network at all for them.
 # Rerun with ALLOD_SOURCE=forge to route back. Step 1 explains the mechanism.
 #
 # The account that runs this stays the operator account: NixOS keeps mutable
@@ -283,10 +284,24 @@ step "Source route: ${ALLOD_SOURCE}"
 case "$ALLOD_SOURCE" in
   forge)  SOURCE_PREFIX="" ;;
   github) SOURCE_PREFIX="https://github.com/allod-stack/" ;;
-  /*)     [[ -d "${ALLOD_SOURCE}/deploy.git" ]] \
-            || die "${ALLOD_SOURCE} holds no deploy.git; expected bare mirrors <dir>/<repo>.git"
-          SOURCE_PREFIX="file://${ALLOD_SOURCE%/}/" ;;
-  *)      die "ALLOD_SOURCE must be forge, github, or an absolute directory of bare mirrors" ;;
+  /*)     # Checkouts (<dir>/<repo>) or bare mirrors (<dir>/<repo>.git). Locked
+          # URLs end in .git and insteadOf rewrites a prefix only, so checkouts
+          # are reached through a directory of <repo>.git symlinks; git follows
+          # each one to the checkout's own .git.
+          src="${ALLOD_SOURCE%/}"
+          if [[ -d "${src}/deploy/.git" ]]; then
+            links="${HOME}/.cache/allod-source"
+            mkdir -p "$links"
+            for r in "${REPOS[@]}"; do
+              [[ -d "${src}/${r}/.git" ]] && ln -sfn "${src}/${r}" "${links}/${r}.git"
+            done
+            SOURCE_PREFIX="file://${links}/"
+          elif [[ -d "${src}/deploy.git" ]]; then
+            SOURCE_PREFIX="file://${src}/"
+          else
+            die "${src} holds neither deploy/ (checkouts) nor deploy.git (bare mirrors)"
+          fi ;;
+  *)      die "ALLOD_SOURCE must be forge, github, or an absolute directory of repos" ;;
 esac
 touch "$GITCONFIG"
 while read -r key value; do
